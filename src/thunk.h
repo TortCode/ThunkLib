@@ -1,7 +1,6 @@
 #ifndef THUNK_H
 #define THUNK_H
 
-#define DEBUG
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdarg.h>
@@ -57,6 +56,7 @@ typedef struct Thunk {
 	struct Value *_val;
 } MThunk;
 typedef const struct Thunk Thunk;
+typedef Thunk *(*Executor)(Thunk**);
 
 /* ALGEBRAIC DATATYPE Value
  * Represents a combination of Product(tuple) and Sum(tagged union) types
@@ -97,11 +97,7 @@ Thunk *Apply(Thunk *f, Thunk *x);
  * x: array terms
  * returns f partially applied to all arguments in x
  */
-Thunk *MultiApply(Thunk *f, Size len, Thunk **x);
-
-Thunk *MultiApply_VA(Thunk *f, Size len, ...); 
-
-Thunk *compose(Thunk*, Thunk*, Thunk*);
+Thunk *MultiApply(Thunk *f, Size len, ...); 
 
 Thunk *Eval(Thunk*);
 
@@ -110,18 +106,24 @@ Thunk *Eval(Thunk*);
  * func: thunk-valued function that accepts array of thunks
  * returns func wrapped in a thunk
  */
-Thunk *Thunk_FuncWrap(Thunk *(*)(Thunk**), Size);
+Thunk *Thunk_WrapFunc(Executor, Size);
 
 /* THUNK CREATOR
  * data: algebraic datatype value
  * returns data wrapped in a thunk
  */
-Thunk *Thunk_ValueWrap(Value*);
+Thunk *Thunk_WrapValue(Value*);
 
-Value *Thunk_ValueExpose(Thunk*);
+Value *Thunk_ExposeValue(Thunk*);
 
 Value *Value_Construct(Size tag, Size fieldc,...);
 
-Value *Value_ConstructVAList(Size tag, Size fieldc, va_list list);
+#define TMakeStruct(tag, fieldc, ...) Thunk_WrapValue(Value_Construct(tag, fieldc, __VA_ARGS__))
+
+#ifdef DEBUG
+#define TGetField(thunk, idx) (!((thunk)->_val)? fprinf(stderr, "%s not fully evaluated yet!", # thunk) : (thunk)->_val->_fields[idx])
+#else
+#define TGetField(thunk, idx) ((thunk)->_val->_fields[idx])
+#endif
 
 #endif

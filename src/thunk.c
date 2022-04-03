@@ -2,13 +2,13 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-void Thunk_DestroyArgs(Thunk *t) {
+static void Thunk_DestroyArgs(Thunk *t) {
 	for (Size i = 0; i < t->_argc; i++)
 		Thunk_Decref(t->_args[i]);
 	tfree(t->_args);
 }
 
-void Value_DestroyFields(Value *v) {
+static void Value_DestroyFields(Value *v) {
 	if (!v->_fields) return;
 	for (Size i = 0; i < v->_fieldc; i++)
 		Thunk_Decref(v->_fields[i]);
@@ -18,10 +18,16 @@ void Value_DestroyFields(Value *v) {
 extern inline void Thunk_Incref(Thunk *t) {
 	asmut(mt, t);
 	++mt->_refct;
+	#ifdef DEBUG
+		printf("INCREF @ %d New Count: %d \n", (int) t, t->_refct);
+	#endif
 }
 
 extern inline void Thunk_Decref(Thunk *t) {
 	asmut(mt, t);
+	#ifdef DEBUG
+		printf("DECREF @ %d New Count: %d \n", (int) t, t->_refct-1);
+	#endif
 	//printf("DECREF CALLED: %d \n",(int) t % 1000);
 	//printf("%d\n", t->_refct-1);
 	if (--mt->_refct == 0) {
@@ -35,7 +41,7 @@ extern inline void Thunk_Decref(Thunk *t) {
 }
 
 /* Only use when dest completely owns src */
-void Thunk_Replace(Thunk *dest, Thunk *src) {
+static void Thunk_Replace(Thunk *dest, Thunk *src) {
 	asmut(md, dest);
 	asmut(ms, src);
 	// copy excess of old args
@@ -66,6 +72,14 @@ Thunk *Eval(Thunk *t) {
 	return t;
 }
 
+static Thunk **Thunk_List(Size len, va_list list) {
+	Thunk **arr = malloc(len * sizeof (Thunk*));
+	for (Size i = 0; i < len; ++i) {
+		Thunk_Incref(arr[i] = va_arg(list, Thunk*));
+	}
+	return arr;
+}
+
 Thunk *Apply(Thunk *f, Thunk *x) {
 #ifdef DEBUG
 	if (f->_val) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
@@ -93,7 +107,7 @@ Thunk *Apply(Thunk *f, Thunk *x) {
 	return app;
 }
 
-Thunk *MultiApply(Thunk *f, Size len, Thunk **x) {
+static Thunk *MultiApply_List(Thunk *f, Size len, Thunk **x) {
 #ifdef DEBUG
 	if (f->_val) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
 #endif
@@ -122,33 +136,16 @@ Thunk *MultiApply(Thunk *f, Size len, Thunk **x) {
 	return app;
 }
 
-Thunk **Thunk_List(Size len, va_list list) {
-	Thunk **arr = malloc(len * sizeof (Thunk*));
-	for (Size i = 0; i < len; ++i) {
-		Thunk_Incref(arr[i] = va_arg(list, Thunk*));
-	}
-	return arr;
-}
-
-Thunk *MultiApply_VA(Thunk *f, Size len, ...) {
+Thunk *MultiApply(Thunk *f, Size len, ...) {
 	wvarargs(list,len,
-		Thunk **x=0;
-		Thunk *rv = MultiApply(f, len, x=Thunk_List(len, list));
+		Thunk **x = Thunk_List(len, list);
+		Thunk *rv = MultiApply_List(f, len, x);
 	)
 	tfree(x);
 	return rv;
 }
 
-Thunk *compose(Thunk *f, Thunk *g, Thunk *x) {
-	wparam(f,
-	wparam(g,
-	wparam(x,
-		Thunk *rv = Apply(f, Apply(g, x));
-	)))
-	return rv;
-}
-
-Thunk *Thunk_FuncWrap(Thunk *(*func)(Thunk**), Size arity) {
+Thunk *Thunk_WrapFunc(Thunk *(*func)(Thunk**), Size arity) {
 	declptr(MThunk, caller);
 	caller->_refct = 0;
 #ifdef DEBUG
@@ -162,7 +159,7 @@ Thunk *Thunk_FuncWrap(Thunk *(*func)(Thunk**), Size arity) {
 	return caller;
 }
 
-Thunk *Thunk_ValueWrap(Value *data) {
+Thunk *Thunk_WrapValue(Value *data) {
 	declptr(MThunk, primitive);
 	primitive->_refct = 0;
 	primitive->_arity = 0;
@@ -173,7 +170,7 @@ Thunk *Thunk_ValueWrap(Value *data) {
 	return primitive;
 }
 
-Value *Thunk_ValueExpose(Thunk *t) {
+Value *Thunk_ExposeValue(Thunk *t) {
 	Thunk_Incref(t);
 	#ifdef DEBUG
 		if (!Eval(t)->_val) { fprintf(stderr, "Cannot extract from composite"); exit(EXIT_FAILURE); }
@@ -183,7 +180,7 @@ Value *Thunk_ValueExpose(Thunk *t) {
 	return v;
 }
 
-Value *Value_Construct(Size tag, Size fieldc,...) {
+static Value *Value_Construct(Size tag, Size fieldc,...) {
 	wvarargs(list, fieldc,
 		declptr(Value, v);
 		v->_tag = tag;
@@ -200,3 +197,5 @@ Value *Value_ConstructVAList(Size tag, Size fieldc, va_list list) {
 	v->_fields = Thunk_List(fieldc, list);
 	return v;
 }
+
+

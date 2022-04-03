@@ -1,6 +1,7 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 #include "thunk.h"
+#include "data_utils.h"
 #include <stdbool.h>
 
 typedef int8_t Int8;
@@ -16,52 +17,41 @@ typedef double Double;
 typedef bool Bool;
 typedef char Char;
 
-#define FUNC_GETTER(name, func, arity) \
-Thunk* name() { \
-    static Thunk* f = NULL; \
-    if (!f) f = Thunk_FuncWrap(func, arity); \
-    return f; \
-}
+#define EXEC_SIG(name, args) Thunk *name(Thunk **args)
+
+#define TWRAP(type) Thunk_Wrap ## type
+#define TEXPOSE(type) Thunk_Expose ## type
+#define VWRAP(type) Value_Wrap ## type
+#define VEXPOSE(type) Value_Expose ## type
 
 #define WRAPVAL_INTO(base, type) \
-inline Value *Value_ ## type ## Wrap(type t) { return Value_ ## base ## Wrap(t); }
+static inline Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
 #define EXPOSEVAL_FROM(base, type) \
-inline type Value_ ## type ## Expose(Value *v) { return Value_ ## base ## Expose(v); }
+static inline type VEXPOSE(type) (Value *v) { return VEXPOSE(base)(v); }
 #define BOX_VALUE(base, type) WRAPVAL_INTO(base, type) EXPOSEVAL_FROM(base, type)
 
-#define WRAP_DECL(type) inline Thunk* Thunk_ ## type ## Wrap(type);
-#define EXPOSE_DECL(type) inline type Thunk_ ## type ## Expose(Thunk*);
+#define WRAP_DECL(type) inline Thunk* TWRAP(type)(type);
+#define EXPOSE_DECL(type) inline type TEXPOSE(type)(Thunk*);
 #define BOX_DECL(type) WRAP_DECL(type) EXPOSE_DECL(type)
 
-BOX_DECL(Int8)
-BOX_DECL(Int16)
-BOX_DECL(Int32)
-BOX_DECL(Int64)
-BOX_DECL(UInt8)
-BOX_DECL(UInt16)
-BOX_DECL(UInt32)
-BOX_DECL(UInt64)
-BOX_DECL(Float)
-BOX_DECL(Double)
+BOX_DECL(Int8) BOX_DECL(Int16) BOX_DECL(Int32) BOX_DECL(Int64)
+BOX_DECL(UInt8) BOX_DECL(UInt16) BOX_DECL(UInt32) BOX_DECL(UInt64)
+BOX_DECL(Float) BOX_DECL(Double)
 BOX_DECL(Bool)
 BOX_DECL(Char)
 
 #define WRAPPER(type) \
-extern inline Thunk* Thunk_ ## type ## Wrap(type v) { \
-    return Thunk_ValueWrap( Value_ ## type ## Wrap(v)); \
+extern inline Thunk* TWRAP(type)(type v) { \
+    return Thunk_WrapValue( Value_Wrap ## type(v)); \
 }
 #define EXPOSER(type) \
-extern inline type Thunk_ ## type ## Expose(Thunk *v) { \
+extern inline type TEXPOSE(type)(Thunk *v) { \
     wparam(v, \
-        type t = Value_ ## type ## Expose(Thunk_ValueExpose(v)); \
+        type t = Value_Expose ## type(Thunk_ExposeValue(v)); \
     ) \
     return t; \
 }
-
-#define TWRAP(type) Thunk_ ## type ## Wrap
-#define TEXPOSE(type) Thunk_ ## type ## Expose
-
-#define GETTER_DECL(name) Thunk* name();
+#define BOX_THUNK(type) WRAPPER(type) EXPOSER(type)
 
 GETTER_DECL(Neg) GETTER_DECL(NegL) GETTER_DECL(NegF) GETTER_DECL(NegD)
 GETTER_DECL(Not)
@@ -80,5 +70,8 @@ GETTER_DECL(Lt)
 GETTER_DECL(Lte)
 GETTER_DECL(Gt)
 GETTER_DECL(Gte)
+
+GETTER_DECL(Comp)
+GETTER_DECL(App)
 
 #endif
