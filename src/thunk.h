@@ -12,7 +12,7 @@ typedef int64_t Size;
 typedef int32_t Size;
 #endif
 
-#define declptr(type, var) \
+#define DECLPTR(type, var) \
 type* var = malloc(sizeof (type))
 
 #define tfree(var) \
@@ -30,11 +30,11 @@ Thunk_Decref(thunk); thunk = NULL;
 Thunk* thunk = def \
 wparam(thunk, body)
 
-#define tomut(froz) (MThunk*) froz
-#define asmut(mut, froz) \
-MThunk* mut = tomut(froz)
+#define TOMUT(froz) ((MThunk*) froz)
+#define ASMUT(mut, froz) \
+MThunk* mut = TOMUT(froz)
 
-#define wvarargs(name, lreqvar, body) \
+#define WVARARGS(name, lreqvar, body) \
 va_list name; \
 va_start(name, lreqvar); \
 body \
@@ -47,16 +47,17 @@ struct Value;
  * When evaluated at full arity, they move assign the result to themselves
  * Primitive thunks contain a constant value of an Algebraic DataType
  */
-typedef struct Thunk {
+typedef struct thunk_t {
 	Size _arity;
 	Size _refct;
-	const struct Thunk *(*_func)(const struct Thunk**);
+	const struct thunk_t *(*_func)(const struct thunk_t**);
 	Size _argc;
-	const struct Thunk **_args;
+	const struct thunk_t **_args;
 	struct Value *_val;
 } MThunk;
-typedef const struct Thunk Thunk;
+typedef const struct thunk_t Thunk;
 typedef Thunk *(*Executor)(Thunk**);
+#define EXEC_SIG(name, args) Thunk *name(Thunk **args)
 
 /* ALGEBRAIC DATATYPE Value
  * Represents a combination of Product(tuple) and Sum(tagged union) types
@@ -90,6 +91,7 @@ inline void Thunk_Decref(Thunk*);
  * returns f partially applied to x
  */
 Thunk *Apply(Thunk *f, Thunk *x);
+#define ap Apply
 
 /* THUNK CREATOR
  * f: function
@@ -97,9 +99,12 @@ Thunk *Apply(Thunk *f, Thunk *x);
  * x: array terms
  * returns f partially applied to all arguments in x
  */
-Thunk *MultiApply(Thunk *f, Size len, ...); 
+Thunk *MultiApply(Thunk *f, Size len, ...);
+#define mulap MultiApply
 
 Thunk *Eval(Thunk*);
+
+#define tag(t) Eval(t)->_val->_tag
 
 /* THUNK CREATOR
  * arity: number of arguments that func requires
@@ -116,14 +121,10 @@ Thunk *Thunk_WrapValue(Value*);
 
 Value *Thunk_ExposeValue(Thunk*);
 
-Value *Value_Construct(Size tag, Size fieldc,...);
+Value *Value_Construct(Size tag, Size fieldc, Thunk **fields);
 
-#define TMakeStruct(tag, fieldc, ...) Thunk_WrapValue(Value_Construct(tag, fieldc, __VA_ARGS__))
+Thunk **ThunkList_FromVA(Size len, ...);
 
-#ifdef DEBUG
-#define TGetField(thunk, idx) (!((thunk)->_val)? fprinf(stderr, "%s not fully evaluated yet!", # thunk) : (thunk)->_val->_fields[idx])
-#else
-#define TGetField(thunk, idx) ((thunk)->_val->_fields[idx])
-#endif
+Thunk **ThunkList_FromVAList(Size len, va_list list);
 
 #endif

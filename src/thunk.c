@@ -2,6 +2,24 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+Thunk **ThunkList_FromVA(Size len, ...) {
+    WVARARGS(list,len,
+        Thunk **arr = malloc(len * sizeof (Thunk*));
+        for (Size i = 0; i < len; ++i) {
+            Thunk_Incref(arr[i] = va_arg(list, Thunk*));
+        }
+    )
+    return arr;
+}
+
+Thunk **ThunkList_FromVAList(Size len, va_list list) {
+    Thunk **arr = malloc(len * sizeof (Thunk*));
+    for (Size i = 0; i < len; ++i) {
+        Thunk_Incref(arr[i] = va_arg(list, Thunk*));
+    }
+    return arr;
+}
+
 static void Thunk_DestroyArgs(Thunk *t) {
 	for (Size i = 0; i < t->_argc; i++)
 		Thunk_Decref(t->_args[i]);
@@ -16,21 +34,19 @@ static void Value_DestroyFields(Value *v) {
 }
 
 extern inline void Thunk_Incref(Thunk *t) {
-	asmut(mt, t);
-	++mt->_refct;
+	++TOMUT(t)->_refct;
 	#ifdef DEBUG
 		printf("INCREF @ %d New Count: %d \n", (int) t, t->_refct);
 	#endif
 }
 
 extern inline void Thunk_Decref(Thunk *t) {
-	asmut(mt, t);
 	#ifdef DEBUG
 		printf("DECREF @ %d New Count: %d \n", (int) t, t->_refct-1);
 	#endif
 	//printf("DECREF CALLED: %d \n",(int) t % 1000);
 	//printf("%d\n", t->_refct-1);
-	if (--mt->_refct == 0) {
+	if (--TOMUT(t)->_refct == 0) {
 		Thunk_DestroyArgs(t);
 		if (t->_val) {
 			Value_DestroyFields(t->_val);
@@ -42,11 +58,11 @@ extern inline void Thunk_Decref(Thunk *t) {
 
 /* Only use when dest completely owns src */
 static void Thunk_Replace(Thunk *dest, Thunk *src) {
-	asmut(md, dest);
-	asmut(ms, src);
+	ASMUT(md, dest);
+	ASMUT(ms, src);
 	// copy excess of old args
 	Size xsargc = -dest->_arity;
-	ms->_args = realloc(tomut(ms->_args), (ms->_argc + xsargc) * sizeof(Thunk*));
+	ms->_args = realloc(TOMUT(ms->_args), (ms->_argc + xsargc) * sizeof(Thunk*));
 	for (Size i = 0; i < xsargc; i++) {
 		// Need to balance with Thunk_Decref from old arg destruction
 		Thunk_Incref(ms->_args[ms->_argc + i] = md->_args[md->_argc - xsargc + i]);
@@ -72,21 +88,13 @@ Thunk *Eval(Thunk *t) {
 	return t;
 }
 
-static Thunk **Thunk_List(Size len, va_list list) {
-	Thunk **arr = malloc(len * sizeof (Thunk*));
-	for (Size i = 0; i < len; ++i) {
-		Thunk_Incref(arr[i] = va_arg(list, Thunk*));
-	}
-	return arr;
-}
-
 Thunk *Apply(Thunk *f, Thunk *x) {
 #ifdef DEBUG
 	if (f->_val) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
 #endif
 	wparam(f,
 		//memory management
-		declptr(MThunk, app);
+		DECLPTR(MThunk, app);
 		app->_refct = 0;
 		//copy func ptr
 		app->_func = f->_func;
@@ -101,7 +109,7 @@ Thunk *Apply(Thunk *f, Thunk *x) {
 			app->_args[i] = f->_args[i];
 			Thunk_Incref(f->_args[i]);
 		}
-		app->_args[f_argc] = tomut(x);
+		app->_args[f_argc] = TOMUT(x);
 		Thunk_Incref(x);
 	)
 	return app;
@@ -113,7 +121,7 @@ static Thunk *MultiApply_List(Thunk *f, Size len, Thunk **x) {
 #endif
 	wparam(f,
 		//memory management
-		declptr(MThunk, app);
+		DECLPTR(MThunk, app);
 		app->_refct = 0;
 		//copy func ptr
 		app->_func = f->_func;
@@ -137,8 +145,8 @@ static Thunk *MultiApply_List(Thunk *f, Size len, Thunk **x) {
 }
 
 Thunk *MultiApply(Thunk *f, Size len, ...) {
-	wvarargs(list,len,
-		Thunk **x = Thunk_List(len, list);
+	WVARARGS(list, len,
+        Thunk **x = ThunkList_FromVAList(len, list);
 		Thunk *rv = MultiApply_List(f, len, x);
 	)
 	tfree(x);
@@ -146,7 +154,7 @@ Thunk *MultiApply(Thunk *f, Size len, ...) {
 }
 
 Thunk *Thunk_WrapFunc(Thunk *(*func)(Thunk**), Size arity) {
-	declptr(MThunk, caller);
+	DECLPTR(MThunk, caller);
 	caller->_refct = 0;
 #ifdef DEBUG
 	if (arity < 1) fprintf(stderr, "Arity of function cannot be 0\n");
@@ -160,7 +168,7 @@ Thunk *Thunk_WrapFunc(Thunk *(*func)(Thunk**), Size arity) {
 }
 
 Thunk *Thunk_WrapValue(Value *data) {
-	declptr(MThunk, primitive);
+	DECLPTR(MThunk, primitive);
 	primitive->_refct = 0;
 	primitive->_arity = 0;
 	primitive->_func = NULL;
@@ -180,21 +188,11 @@ Value *Thunk_ExposeValue(Thunk *t) {
 	return v;
 }
 
-static Value *Value_Construct(Size tag, Size fieldc,...) {
-	wvarargs(list, fieldc,
-		declptr(Value, v);
-		v->_tag = tag;
-		v->_fieldc = fieldc;
-		v->_fields = Thunk_List(fieldc, list);
-	)
-	return v;
-}
-
-Value *Value_ConstructVAList(Size tag, Size fieldc, va_list list) {
-	declptr(Value, v);
-	v->_tag = tag;
-	v->_fieldc = fieldc;
-	v->_fields = Thunk_List(fieldc, list);
+Value *Value_Construct(Size tag, Size fieldc, Thunk **fields) {
+    DECLPTR(Value, v);
+    v->_tag = tag;
+    v->_fieldc = fieldc;
+    v->_fields = fields;
 	return v;
 }
 

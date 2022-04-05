@@ -2,9 +2,17 @@
 #include "data_utils.h"
 
 enum List{
-    Nil,
-    Cons
+    tNil,
+    tCons
 };
 
-CONSTRUCTOR_DECL(Nil)
-CONSTRUCTOR_DECL(Cons)
+CONSTRUCTOR_DECL(tNil)
+CONSTRUCTOR_DECL(tCons)
+
+GETFUNC_DECL(map)
+
+GETFUNC_DECL(filter)
+
+GETFUNC_DECL(foldl)
+
+GETFUNC_DECL(foldr)

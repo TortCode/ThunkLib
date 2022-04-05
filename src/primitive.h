@@ -17,24 +17,22 @@ typedef double Double;
 typedef bool Bool;
 typedef char Char;
 
-#define EXEC_SIG(name, args) Thunk *name(Thunk **args)
-
 #define TWRAP(type) Thunk_Wrap ## type
 #define TEXPOSE(type) Thunk_Expose ## type
 #define VWRAP(type) Value_Wrap ## type
 #define VEXPOSE(type) Value_Expose ## type
 
-#define WRAPVAL_INTO(base, type) \
+#define WRAPINTO_VAL(base, type) \
 static inline Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
-#define EXPOSEVAL_FROM(base, type) \
+#define EXPOSEFROM_VAL(base, type) \
 static inline type VEXPOSE(type) (Value *v) { return VEXPOSE(base)(v); }
-#define BOX_VALUE(base, type) WRAPVAL_INTO(base, type) EXPOSEVAL_FROM(base, type)
+#define BOX_VALUE(base, type) WRAPINTO_VAL(base, type) EXPOSEFROM_VAL(base, type)
 
 #define WRAP_DECL(type) inline Thunk* TWRAP(type)(type);
 #define EXPOSE_DECL(type) inline type TEXPOSE(type)(Thunk*);
 #define BOX_DECL(type) WRAP_DECL(type) EXPOSE_DECL(type)
 
-BOX_DECL(Int8) BOX_DECL(Int16) BOX_DECL(Int32) BOX_DECL(Int64)
+BOX_DECL(Int8)  BOX_DECL(Int16) BOX_DECL(Int32) BOX_DECL(Int64)
 BOX_DECL(UInt8) BOX_DECL(UInt16) BOX_DECL(UInt32) BOX_DECL(UInt64)
 BOX_DECL(Float) BOX_DECL(Double)
 BOX_DECL(Bool)
@@ -53,25 +51,25 @@ extern inline type TEXPOSE(type)(Thunk *v) { \
 }
 #define BOX_THUNK(type) WRAPPER(type) EXPOSER(type)
 
-GETTER_DECL(Neg) GETTER_DECL(NegL) GETTER_DECL(NegF) GETTER_DECL(NegD)
-GETTER_DECL(Not)
+GETFUNC_DECL(Neg) GETFUNC_DECL(NegL) GETFUNC_DECL(NegF) GETFUNC_DECL(NegD)
+GETFUNC_DECL(Not)
 
-GETTER_DECL(Add) GETTER_DECL(AddL) GETTER_DECL(AddF) GETTER_DECL(AddD)
-GETTER_DECL(Sub) GETTER_DECL(SubL) GETTER_DECL(SubF) GETTER_DECL(SubD)
-GETTER_DECL(Mul) GETTER_DECL(MulL) GETTER_DECL(MulF) GETTER_DECL(MulD)
-GETTER_DECL(Div) GETTER_DECL(DivL) GETTER_DECL(DivF) GETTER_DECL(DivD)
-GETTER_DECL(Mod) GETTER_DECL(ModL)
+GETFUNC_DECL(Add) GETFUNC_DECL(AddL) GETFUNC_DECL(AddF) GETFUNC_DECL(AddD)
+GETFUNC_DECL(Sub) GETFUNC_DECL(SubL) GETFUNC_DECL(SubF) GETFUNC_DECL(SubD)
+GETFUNC_DECL(Mul) GETFUNC_DECL(MulL) GETFUNC_DECL(MulF) GETFUNC_DECL(MulD)
+GETFUNC_DECL(Div) GETFUNC_DECL(DivL) GETFUNC_DECL(DivF) GETFUNC_DECL(DivD)
+GETFUNC_DECL(Mod) GETFUNC_DECL(ModL)
 
-GETTER_DECL(And)
-GETTER_DECL(Or)
-GETTER_DECL(Eq)
-GETTER_DECL(Neq)
-GETTER_DECL(Lt)
-GETTER_DECL(Lte)
-GETTER_DECL(Gt)
-GETTER_DECL(Gte)
+GETFUNC_DECL(And)
+GETFUNC_DECL(Or)
+GETFUNC_DECL(Eq)
+GETFUNC_DECL(Neq)
+GETFUNC_DECL(Lt)
+GETFUNC_DECL(Lte)
+GETFUNC_DECL(Gt)
+GETFUNC_DECL(Gte)
 
-GETTER_DECL(Comp)
-GETTER_DECL(App)
+GETFUNC_DECL(Comp)
+GETFUNC_DECL(App)
 
 #endif

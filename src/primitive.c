@@ -11,7 +11,7 @@ static Int32 Value_ExposeInt32(Value*);
 BOX_VALUE(Int32, Int8)
 BOX_VALUE(Int32, Int16)
 VWRAP_SIG(Int32, i) {
-	declptr(Value, data);
+	DECLPTR(Value, data);
 	data->_tag = i;
 	data->_fieldc = 0;
 	data->_fields = NULL;
@@ -20,7 +20,7 @@ VWRAP_SIG(Int32, i) {
 VEXPOSE_SIG(Int32, v) { return v->_tag; }
 #if defined USE_INT64
 VWRAP_SIG(Int64, l) {
-	declptr(Value, data);
+	DECLPTR(Value, data);
 	data->_tag = l;
 	data->_fieldc = 0;
 	data->_fields = NULL;
@@ -29,7 +29,7 @@ VWRAP_SIG(Int64, l) {
 VEXPOSE_SIG(Int64, v) { return v->_tag; }
 #else
 VWRAP_SIG(Int64, l) {
-	declptr(Value, data);
+	DECLPTR(Value, data);
 	data->_tag = (Int32)(l >> 32);
 	data->_fieldc = (Int32)l;
 	data->_fields = NULL;
@@ -63,20 +63,20 @@ BOX_THUNK(Bool)
 BOX_THUNK(Char)
 
 #define UNOP_DEF(name, type, op) \
-static Thunk* name(Thunk** args) { \
+static EXEC_SIG(name, args) { \
 	return TWRAP(type)( op TEXPOSE(type)(args[0]) ); \
 }
 #define UNOP(name, type, op) \
 UNOP_DEF(name ## _func, type, op) \
-FUNC_GETTER(name, name ## _func, 1)
+GETFUNC(name, name ## _func, 1)
 
 #define BINOP_DEF(name, type, op) \
-static Thunk* name(Thunk** args) { \
+static EXEC_SIG(name, args) { \
 	return TWRAP(type)( TEXPOSE(type)(args[0]) op TEXPOSE(type)(args[1]) ); \
 }
 #define BINOP(name, type, op) \
 BINOP_DEF(name ## _func, type, op) \
-FUNC_GETTER(name, name ## _func, 2)
+GETFUNC(name, name ## _func, 2)
 
 UNOP(Neg, Int32, -) UNOP(NegL, Int64, -) UNOP(NegF, Float, -) UNOP(NegD, Double, -)
 UNOP(Not, Bool, !)
@@ -99,10 +99,10 @@ BINOP(Gte, Bool, >=)
 static EXEC_SIG(compose_func, args) {
 	return Apply(args[0], Apply(args[1], args[2]));
 }
-FUNC_GETTER(Comp, compose_func, 3)
+GETFUNC(Comp, compose_func, 3)
 
 static EXEC_SIG(apply_func, args) {
 	return Apply(args[0], args[1]);
 }
-FUNC_GETTER(App, apply_func, 2)
+GETFUNC(App, apply_func, 2)
 
