@@ -62,47 +62,39 @@ BOX_THUNK(Double)
 BOX_THUNK(Bool)
 BOX_THUNK(Char)
 
-#define UNOP_DEF(name, type, op) \
-static EXEC_SIG(name, args) { \
-	return TWRAP(type)( op TEXPOSE(type)(args[0]) ); \
-}
 #define UNOP(name, type, op) \
-UNOP_DEF(name ## _func, type, op) \
-GETFUNC(name, name ## _func, 1)
+FUNC_DEF(name, 1, args, return wrap(type, (op expose(type,args[0]))); )
 
-#define BINOP_DEF(name, type, op) \
-static EXEC_SIG(name, args) { \
-	return TWRAP(type)( TEXPOSE(type)(args[0]) op TEXPOSE(type)(args[1]) ); \
-}
 #define BINOP(name, type, op) \
-BINOP_DEF(name ## _func, type, op) \
-GETFUNC(name, name ## _func, 2)
+FUNC_DEF(name, 2, args, return wrap(type, (expose(type, args[0]) op expose(type, args[1]))); )                              \
 
-UNOP(Neg, Int32, -) UNOP(NegL, Int64, -) UNOP(NegF, Float, -) UNOP(NegD, Double, -)
-UNOP(Not, Bool, !)
+#define OP_FORALLNUMS(name, op, kind) \
+kind(name ## B, Int8, op)             \
+kind(name ## S, Int16, op)            \
+kind(name ## I, Int32, op)            \
+kind(name ## L, Int64, op)            \
+kind(name ## F, Float, op)            \
+kind(name ## D, Double, op)
 
-BINOP(Add, Int32, +) BINOP(AddL, Int64, +) UNOP(AddF, Float, -) UNOP(AddD, Double, -)
-BINOP(Sub, Int32, -) BINOP(SubL, Int64, -) UNOP(SubF, Float, -) UNOP(SubD, Double, -)
-BINOP(Mul, Int32, *) BINOP(MulL, Int64, *) UNOP(MulF, Float, -) UNOP(MulD, Double, -)
-BINOP(Div, Int32, %) BINOP(DivL, Int64, %) UNOP(DivF, Float, -) UNOP(DivD, Double, -)
-BINOP(Mod, Int32, %) BINOP(ModL, Int64, %)
+OP_FORALLNUMS(neg, -, UNOP)
+UNOP(not, Bool, !)
 
-BINOP(And, Bool, &&)
-BINOP(Or, Bool, ||)
-BINOP(Eq, Bool, ==)
-BINOP(Neq, Bool, !=)
-BINOP(Lt, Bool, <)
-BINOP(Lte, Bool, <=)
-BINOP(Gt, Bool, >)
-BINOP(Gte, Bool, >=)
+OP_FORALLNUMS(add, +, BINOP)
+OP_FORALLNUMS(sub, -, BINOP)
+OP_FORALLNUMS(mul, *, BINOP)
+OP_FORALLNUMS(div, /, BINOP)
+BINOP(modI, Int32, %) BINOP(modL, Int64, %)
 
-static EXEC_SIG(compose_func, args) {
-	return Apply(args[0], Apply(args[1], args[2]));
-}
-GETFUNC(Comp, compose_func, 3)
+BINOP(and, Bool, &&)
+BINOP(or, Bool, ||)
+BINOP(eq, Bool, ==)
+BINOP(neq, Bool, !=)
+BINOP(lt, Bool, <)
+BINOP(lte, Bool, <=)
+BINOP(gt, Bool, >)
+BINOP(gte, Bool, >=)
 
-static EXEC_SIG(apply_func, args) {
-	return Apply(args[0], args[1]);
-}
-GETFUNC(App, apply_func, 2)
+FUNC_DEF(compose, 3, args, return Apply(args[0], Apply(args[1], args[2])); )
+
+FUNC_DEF(app, 2, args, return Apply(args[0], args[1]); )
 

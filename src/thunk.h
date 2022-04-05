@@ -5,40 +5,13 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <stddef.h>
+#include "utils.h"
 
 #if defined USE_INT64
 typedef int64_t Size;
 #else 
 typedef int32_t Size;
 #endif
-
-#define DECLPTR(type, var) \
-type* var = malloc(sizeof (type))
-
-#define tfree(var) \
-free((MThunk*)var)
-
-/*MEMORY MANAGEMENT
- *Use instead of directly calling reference counter functions
- */
-#define wparam(thunk,body) \
-Thunk_Incref(thunk); \
-body \
-Thunk_Decref(thunk); thunk = NULL;
-
-#define wparamas(thunk, def, body) \
-Thunk* thunk = def \
-wparam(thunk, body)
-
-#define TOMUT(froz) ((MThunk*) froz)
-#define ASMUT(mut, froz) \
-MThunk* mut = TOMUT(froz)
-
-#define WVARARGS(name, lreqvar, body) \
-va_list name; \
-va_start(name, lreqvar); \
-body \
-va_end(name);
 
 struct Value;
 
@@ -103,8 +76,6 @@ Thunk *MultiApply(Thunk *f, Size len, ...);
 #define mulap MultiApply
 
 Thunk *Eval(Thunk*);
-
-#define tag(t) Eval(t)->_val->_tag
 
 /* THUNK CREATOR
  * arity: number of arguments that func requires

@@ -1,7 +1,7 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 #include "thunk.h"
-#include "data_utils.h"
+#include "utils.h"
 #include <stdbool.h>
 
 typedef int8_t Int8;
@@ -21,6 +21,9 @@ typedef char Char;
 #define TEXPOSE(type) Thunk_Expose ## type
 #define VWRAP(type) Value_Wrap ## type
 #define VEXPOSE(type) Value_Expose ## type
+
+#define wrap(type, val) TWRAP(type)(val)
+#define expose(type, val) TEXPOSE(type)(val)
 
 #define WRAPINTO_VAL(base, type) \
 static inline Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
@@ -51,25 +54,25 @@ extern inline type TEXPOSE(type)(Thunk *v) { \
 }
 #define BOX_THUNK(type) WRAPPER(type) EXPOSER(type)
 
-GETFUNC_DECL(Neg) GETFUNC_DECL(NegL) GETFUNC_DECL(NegF) GETFUNC_DECL(NegD)
-GETFUNC_DECL(Not)
+GETFUNC_DECL(negI) GETFUNC_DECL(negL) GETFUNC_DECL(negF) GETFUNC_DECL(negD)
+GETFUNC_DECL(not)
 
-GETFUNC_DECL(Add) GETFUNC_DECL(AddL) GETFUNC_DECL(AddF) GETFUNC_DECL(AddD)
-GETFUNC_DECL(Sub) GETFUNC_DECL(SubL) GETFUNC_DECL(SubF) GETFUNC_DECL(SubD)
-GETFUNC_DECL(Mul) GETFUNC_DECL(MulL) GETFUNC_DECL(MulF) GETFUNC_DECL(MulD)
-GETFUNC_DECL(Div) GETFUNC_DECL(DivL) GETFUNC_DECL(DivF) GETFUNC_DECL(DivD)
-GETFUNC_DECL(Mod) GETFUNC_DECL(ModL)
+GETFUNC_DECL(addI) GETFUNC_DECL(addL) GETFUNC_DECL(addF) GETFUNC_DECL(addD)
+GETFUNC_DECL(subI) GETFUNC_DECL(subL) GETFUNC_DECL(subF) GETFUNC_DECL(subD)
+GETFUNC_DECL(mulI) GETFUNC_DECL(mulL) GETFUNC_DECL(mulF) GETFUNC_DECL(mulD)
+GETFUNC_DECL(divI) GETFUNC_DECL(divL) GETFUNC_DECL(divF) GETFUNC_DECL(divD)
+GETFUNC_DECL(modI) GETFUNC_DECL(modL)
 
-GETFUNC_DECL(And)
-GETFUNC_DECL(Or)
-GETFUNC_DECL(Eq)
-GETFUNC_DECL(Neq)
-GETFUNC_DECL(Lt)
-GETFUNC_DECL(Lte)
-GETFUNC_DECL(Gt)
-GETFUNC_DECL(Gte)
+GETFUNC_DECL(and)
+GETFUNC_DECL(or)
+GETFUNC_DECL(eq)
+GETFUNC_DECL(neq)
+GETFUNC_DECL(lt)
+GETFUNC_DECL(lte)
+GETFUNC_DECL(gt)
+GETFUNC_DECL(gte)
 
-GETFUNC_DECL(Comp)
-GETFUNC_DECL(App)
+GETFUNC_DECL(comp)
+GETFUNC_DECL(app)
 
 #endif

@@ -1,13 +1,13 @@
 #include "thunk.h" 
-#include "data_utils.h"
+#include "utils.h"
 
 enum List{
-    tNil,
-    tCons
+    CON2TAG(Nil),
+    CON2TAG(Cons)
 };
 
-CONSTRUCTOR_DECL(tNil)
-CONSTRUCTOR_DECL(tCons)
+CONSTRUCTOR_DECL(Nil)
+CONSTRUCTOR_DECL(Cons)
 
 GETFUNC_DECL(map)
 
