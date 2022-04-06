@@ -8,9 +8,9 @@ static EXEC_SIG(map_func, args) {
     Thunk *f = args[0], *l = args[1];
     caseof(l) {
         pat(Nil):
-            return mk(Nil, 0);
+            return mk(Nil);
         pat(Cons):
-            return mk(Cons, 2,
+            return mk(Cons,
                       ap(f, get(l, 0)),
                       mulap(map(), 2, f, get(l, 1)));
     }
@@ -22,12 +22,12 @@ static EXEC_SIG(filter_func, args) {
     Thunk *p = args[0]; Thunk *l = args[1];
     caseof(l) {
         pat(Nil): {
-            return mk(Nil, 0);
+            return mk(Nil);
         }
         pat(Cons): {
             if (expose(Bool, ap(p, get(l, 0)))) {
                 Thunk *x = get(l, 0), *xs = get(l, 1);
-                return mk(Cons, 2, x, mulap(filter(), 2, p, xs));
+                return mk(Cons, x, mulap(filter(), 2, p, xs));
             } else
                 return mulap(filter(), 2, p, get(l, 1));
         }
