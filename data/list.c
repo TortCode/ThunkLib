@@ -28,7 +28,8 @@ static EXEC_SIG(filter_func, args) {
             if (expose(Bool, ap(p, get(l, 0)))) {
                 Thunk *x = get(l, 0), *xs = get(l, 1);
                 return mk(Cons, 2, x, mulap(filter(), 2, p, xs));
-            } else
+            }
+            else
                 return mulap(filter(), 2, p, get(l, 1));
         }
     }
@@ -50,4 +51,16 @@ static EXEC_SIG(foldl_func, args) {
 }
 
 GETFUNC(foldl, foldl_func, 3)
+
+static EXEC_SIG(foldr_func, args) {
+    Thunk *f = args[0], *acc = args[1], *l = args[2];
+    caseof(l) {
+        pat(Nil): {
+            return acc;
+        }
+        pat(Cons): {
+            Thunk *x = get(l, 0), *xs = get(l, 1);
+        }
+    }
+}
 

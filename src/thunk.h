@@ -13,34 +13,39 @@ typedef int64_t Size;
 typedef int32_t Size;
 #endif
 
-struct Value;
+struct value_t;
+typedef struct value_t Value;
+
+struct thunk_t;
+typedef const struct thunk_t Thunk;
+typedef struct thunk_t MThunk;
+typedef Thunk *(*Executor)(Thunk**);
 
 /* ALMIGHTY THUNK
  * A structure lazily representing partially applied functions
  * When evaluated at full arity, they move assign the result to themselves
  * Primitive thunks contain a constant value of an Algebraic DataType
  */
-typedef struct thunk_t {
+struct thunk_t {
 	Size _arity;
 	Size _refct;
-	const struct thunk_t *(*_func)(const struct thunk_t**);
+	Executor _func;
 	Size _argc;
-	const struct thunk_t **_args;
+	Thunk **_args;
 	struct Value *_val;
-} MThunk;
-typedef const struct thunk_t Thunk;
-typedef Thunk *(*Executor)(Thunk**);
+};
+
 #define EXEC_SIG(name, args) Thunk *name(Thunk **args)
 
 /* ALGEBRAIC DATATYPE Value
  * Represents a combination of Product(tuple) and Sum(tagged union) types
  * All ADTs normalize to a Sum of Product types, encoded here as a tagged array of Thunks
  */
-typedef struct Value {
+struct value_t {
 	Size _tag;
 	Size _fieldc;
 	Thunk **_fields;
-} Value;
+};
 
 /* REFERENCE INCREMENT
  * reference count set to 0 when Thunk is constructed

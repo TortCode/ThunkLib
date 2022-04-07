@@ -1,3 +1,5 @@
+#ifndef UTILS_H
+#define UTILS_H
 
 #define DECLPTR(type, var) \
 type* var = malloc(sizeof (type))
@@ -73,5 +75,7 @@ extern inline Thunk *Get ## name(Value *v) { \
 #define get(thunk, idx) (!((thunk)->_val)? fprinf(stderr, "%s not fully evaluated yet!", # thunk) : (thunk)->_val->_fields[CON2TAG(idx)])
 #else
 #define get(thunk, idx) ((thunk)->_val->_fields[idx])
+#endif
+
 #endif
 

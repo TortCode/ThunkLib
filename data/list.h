@@ -1,4 +1,7 @@
-#include "thunk.h" 
+#ifndef LIST_H
+#define LIST_H
+
+#include "thunk.h"
 #include "utils.h"
 
 enum List{
@@ -16,3 +19,5 @@ GETFUNC_DECL(filter)
 GETFUNC_DECL(foldl)
 
 GETFUNC_DECL(foldr)
+
+#endif
