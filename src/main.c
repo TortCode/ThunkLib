@@ -4,13 +4,15 @@
 
 
 int main(void) {
-	Thunk* sum = Add();
-	Thunk* neg = Neg();
-	int i = 4;
-	int j = 5;
-	Thunk* in = Apply(sum, Thunk_WrapInt32(i));
-	Thunk* is = Apply(in, Thunk_WrapInt32(j));
-	Thunk* n = Apply(neg, is);
-	printf("%d \n", Thunk_ExposeInt32(n));
+	Thunk* sum = addI();
+	Thunk* neg = negI();
+	int i = 0;
+	int j = 0;
+    scanf("%d", &i);
+    scanf("%d", &j);
+	Thunk* in = ap(sum, wrap(Int32, i));
+	Thunk* is = ap(in, wrap(Int32, j));
+	Thunk* n = ap(neg, is);
+	printf("%d \n", expose(Int32, n));
 	return 0;
 }

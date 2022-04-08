@@ -13,10 +13,8 @@ typedef int64_t Size;
 typedef int32_t Size;
 #endif
 
-struct value_t;
 typedef struct value_t Value;
 
-struct thunk_t;
 typedef const struct thunk_t Thunk;
 typedef struct thunk_t MThunk;
 typedef Thunk *(*Executor)(Thunk**);
@@ -32,7 +30,7 @@ struct thunk_t {
 	Executor _func;
 	Size _argc;
 	Thunk **_args;
-	struct Value *_val;
+	Value *_val;
 };
 
 #define EXEC_SIG(name, args) Thunk *name(Thunk **args)
@@ -78,7 +76,6 @@ Thunk *Apply(Thunk *f, Thunk *x);
  * returns f partially applied to all arguments in x
  */
 Thunk *MultiApply(Thunk *f, Size len, ...);
-#define mulap MultiApply
 
 Thunk *Eval(Thunk*);
 

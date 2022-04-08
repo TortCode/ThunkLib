@@ -23,14 +23,14 @@ Thunk **ThunkList_FromVAList(Size len, va_list list) {
 static void Thunk_DestroyArgs(Thunk *t) {
 	for (Size i = 0; i < t->_argc; i++)
 		Thunk_Decref(t->_args[i]);
-	tfree(t->_args);
+	TFREE(t->_args);
 }
 
 static void Value_DestroyFields(Value *v) {
 	if (!v->_fields) return;
 	for (Size i = 0; i < v->_fieldc; i++)
 		Thunk_Decref(v->_fields[i]);
-	tfree(v->_fields);
+	TFREE(v->_fields);
 }
 
 extern inline void Thunk_Incref(Thunk *t) {
@@ -52,7 +52,7 @@ extern inline void Thunk_Decref(Thunk *t) {
 			Value_DestroyFields(t->_val);
 			free(t->_val);
 		}
-		tfree(t);
+		TFREE(t);
 	}
 }
 
@@ -149,7 +149,7 @@ Thunk *MultiApply(Thunk *f, Size len, ...) {
         Thunk **x = ThunkList_FromVAList(len, list);
 		Thunk *rv = MultiApply_List(f, len, x);
 	)
-	tfree(x);
+	TFREE(x);
 	return rv;
 }
 
