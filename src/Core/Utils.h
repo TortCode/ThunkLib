@@ -1,8 +1,8 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef THUNKLIB__CORE__UTILS_H
+#define THUNKLIB__CORE__UTILS_H
 
-#include "core/utils/mem_utils.h"
-#include "core/utils/lang_utils.h"
+#include "Utils/Mem.h"
+#include "Utils/Lang.h"
 
 //#define DEBUG
 //#define REF_DEBUG

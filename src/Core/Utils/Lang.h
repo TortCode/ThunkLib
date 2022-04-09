@@ -1,5 +1,5 @@
-#ifndef THUNKLIB_LANG_UTILS_H
-#define THUNKLIB_LANG_UTILS_H
+#ifndef THUNKLIB__CORE__UTILS__LANG_H
+#define THUNKLIB__CORE__UTILS__LANG_H
 
 #define WVARARGS(name, lreqvar, body) \
 va_list name; \

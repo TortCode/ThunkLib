@@ -1,6 +1,4 @@
-#include "list.h"
-#include "core/primitive.h"
-#include <stdio.h>
+#include "List.h"
 
 CONSTRUCTOR(Nil, 0)
 CONSTRUCTOR(Cons, 2)

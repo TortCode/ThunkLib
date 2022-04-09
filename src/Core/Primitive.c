@@ -1,4 +1,4 @@
-#include "primitive.h"
+#include "Primitive.h"
 
 #define VWRAP_SIG(type, var) \
 static Value *VWRAP(type)(type var)

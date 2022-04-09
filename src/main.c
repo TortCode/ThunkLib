@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "core.h"
-#include "list.h"
+#include "Core.h"
+#include "Data/List.h"
 
 #define offset(type, field) &(((type*)0)->field)
 

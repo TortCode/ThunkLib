@@ -1,5 +1,5 @@
-#ifndef THUNKLIB_MEM_UTILS_H
-#define THUNKLIB_MEM_UTILS_H
+#ifndef THUNKLIB__CORE__UTILS__MEM_H
+#define THUNKLIB__CORE__UTILS__MEM_H
 
 #define DECLPTR(type, var) \
 type* var = malloc(sizeof (type))

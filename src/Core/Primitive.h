@@ -1,6 +1,6 @@
-#ifndef PRIMITIVE_H
-#define PRIMITIVE_H
-#include "thunk.h"
+#ifndef THUNKLIB__CORE__PRIMITIVE_H
+#define THUNKLIB__CORE__PRIMITIVE_H
+#include "Thunk.h"
 
 
 #define wrap(type, val) TWRAP(type)(val)

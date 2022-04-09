@@ -1,12 +1,12 @@
-#ifndef THUNK_H
-#define THUNK_H
+#ifndef THUNKLIB__CORE__THUNK_H
+#define THUNKLIB__CORE__THUNK_H
 
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
-#include "utils.h"
+#include "Utils.h"
 
 typedef int8_t Int8;
 typedef int16_t Int16;
@@ -103,8 +103,8 @@ Thunk *Eval(Thunk*);
 Thunk *Thunk_WrapFunc(Executor, Size);
 
 /* THUNK CREATOR & VALUE BOXER
- * data: algebraic datatype value
- * returns data wrapped in a thunk
+ * Data: algebraic datatype value
+ * returns Data wrapped in a thunk
  */
 Thunk *Thunk_WrapValue(Value*);
 
