@@ -35,13 +35,13 @@ static void Value_DestroyFields(Value *v) {
 
 extern inline void Thunk_Incref(Thunk *t) {
 	++TOMUT(t)->_refct;
-	#ifdef DEBUG
+	#ifdef REF_DEBUG
 		printf("INCREF @ %d New Count: %d \n", (int) t, t->_refct);
 	#endif
 }
 
 extern inline void Thunk_Decref(Thunk *t) {
-	#ifdef DEBUG
+	#ifdef REF_DEBUG
 		printf("DECREF @ %d New Count: %d \n", (int) t, t->_refct-1);
 	#endif
 	//printf("DECREF CALLED: %d \n",(int) t % 1000);
@@ -89,7 +89,7 @@ Thunk *Eval(Thunk *t) {
 }
 
 Thunk *Apply(Thunk *f, Thunk *x) {
-#ifdef DEBUG
+#ifdef ARITY_DEBUG
 	if (f->_val) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
 #endif
 	wparam(f,
@@ -116,7 +116,7 @@ Thunk *Apply(Thunk *f, Thunk *x) {
 }
 
 static Thunk *MultiApply_List(Thunk *f, Size len, Thunk **x) {
-#ifdef DEBUG
+#ifdef NOFUNC_DEBUG
 	if (f->_val) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
 #endif
 	wparam(f,
@@ -145,6 +145,9 @@ static Thunk *MultiApply_List(Thunk *f, Size len, Thunk **x) {
 }
 
 Thunk *MultiApply(Thunk *f, Size len, ...) {
+#ifdef NOFUNC_DEBUG
+    if (!f->_func) fprintf(stderr, "First Arg of MultiApply must be a function");
+#endif
 	WVARARGS(list, len,
         Thunk **x = ThunkList_FromVAList(len, list);
 		Thunk *rv = MultiApply_List(f, len, x);
@@ -153,10 +156,10 @@ Thunk *MultiApply(Thunk *f, Size len, ...) {
 	return rv;
 }
 
-Thunk *Thunk_WrapFunc(Thunk *(*func)(Thunk**), Size arity) {
+Thunk *Thunk_WrapFunc(Executor func, Size arity) {
 	DECLPTR(MThunk, caller);
 	caller->_refct = 0;
-#ifdef DEBUG
+#ifdef ARITY_DEBUG
 	if (arity < 1) fprintf(stderr, "Arity of function cannot be 0\n");
 #endif
 	caller->_arity = arity;
@@ -180,7 +183,7 @@ Thunk *Thunk_WrapValue(Value *data) {
 
 Value *Thunk_ExposeValue(Thunk *t) {
 	Thunk_Incref(t);
-	#ifdef DEBUG
+	#ifdef NOVAL_DEBUG
 		if (!Eval(t)->_val) { fprintf(stderr, "Cannot extract from composite"); exit(EXIT_FAILURE); }
 	#endif
 		Value *v = Eval(t)->_val;
@@ -188,7 +191,7 @@ Value *Thunk_ExposeValue(Thunk *t) {
 	return v;
 }
 
-Value *Value_Construct(Size tag, Size fieldc, Thunk **fields) {
+extern inline Value *Value_Construct(Size tag, Size fieldc, Thunk **fields) {
     DECLPTR(Value, v);
     v->_tag = tag;
     v->_fieldc = fieldc;

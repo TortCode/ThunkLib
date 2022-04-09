@@ -1,5 +1,6 @@
 #include "list.h"
 #include "primitive.h"
+#include <stdio.h>
 
 CONSTRUCTOR(Nil, 0)
 CONSTRUCTOR(Cons, 2)
@@ -39,6 +40,9 @@ GETFUNC(filter, filter_func, 2)
 
 static EXEC_SIG(foldl_func, args) {
     Thunk *f = args[0], *acc = args[1], *l = args[2];
+#ifdef DEBUG
+    printf("acc: %d \n", expose(Int32, acc));
+#endif
     caseof(l) {
         pat(Nil): {
             return acc;

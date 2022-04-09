@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdarg.h>
 #include <stddef.h>
+#include <stdarg.h>
 #include "utils.h"
 
 #if defined USE_INT64
@@ -14,7 +14,6 @@ typedef int32_t Size;
 #endif
 
 typedef struct value_t Value;
-
 typedef const struct thunk_t Thunk;
 typedef struct thunk_t MThunk;
 typedef Thunk *(*Executor)(Thunk**);
@@ -25,8 +24,9 @@ typedef Thunk *(*Executor)(Thunk**);
  * Primitive thunks contain a constant value of an Algebraic DataType
  */
 struct thunk_t {
+    Size _refct;
+
 	Size _arity;
-	Size _refct;
 	Executor _func;
 	Size _argc;
 	Thunk **_args;
@@ -94,7 +94,7 @@ Thunk *Thunk_WrapValue(Value*);
 
 Value *Thunk_ExposeValue(Thunk*);
 
-Value *Value_Construct(Size tag, Size fieldc, Thunk **fields);
+inline Value *Value_Construct(Size tag, Size fieldc, Thunk **fields);
 
 Thunk **ThunkList_FromVA(Size len, ...);
 

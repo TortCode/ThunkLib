@@ -1,8 +1,14 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define DEBUG
+#define REF_DEBUG
+#define ARITY_DEBUG
+#define NOVAL_DEBUG
+#define NOFUNC_DEBUG
+
 #define PP_NARG(...) \
-         PP_NARG_(__VA_ARGS__,PP_RSEQ_N)
+         PP_NARG_(__VA_ARGS__ __VA_OPT__(,) PP_RSEQ_N)
 #define PP_NARG_(...) \
          PP_ARG_N(__VA_ARGS__)
 #define PP_ARG_N( \
@@ -21,6 +27,9 @@
          29,28,27,26,25,24,23,22,21,20, \
          19,18,17,16,15,14,13,12,11,10, \
          9,8,7,6,5,4,3,2,1,0
+
+#define STR(...) STR_(__VA_ARGS__)
+#define STR_(...) # __VA_ARGS__
 
 #define DECLPTR(type, var) \
 type* var = malloc(sizeof (type))
@@ -54,7 +63,7 @@ va_end(name);
 #define GETFUNC(name, func, arity) \
 Thunk* name() { \
     static Thunk* f = NULL; \
-    if (!f) f = Thunk_WrapFunc(func, arity); \
+    if (!f) Thunk_Incref(f = Thunk_WrapFunc(func, arity)); \
     return f; \
 }
 #define GETFUNC_DECL(name) Thunk* name();
@@ -92,10 +101,10 @@ extern inline Thunk *Get ## name(Value *v) { \
     return v->fields[CON2TAG(idx)]; \
 }
 
-#define mkstruct(tag, fieldc, ...) Thunk_WrapValue(Value_Construct(tag, CON2TAG(fieldc), __VA_ARGS__))
+#define mkstruct(tag, fieldc, ...) Thunk_WrapValue(Value_Construct(tag, fieldc, __VA_ARGS__))
 
 #ifdef DEBUG
-#define get(thunk, idx) (!((thunk)->_val)? fprinf(stderr, "%s not fully evaluated yet!", # thunk) : (thunk)->_val->_fields[CON2TAG(idx)])
+#define get(thunk, idx) (!((thunk)->_val)? fprintf(stderr, "%s not fully evaluated yet!", # thunk) : (thunk)->_val->_fields[idx])
 #else
 #define get(thunk, idx) ((thunk)->_val->_fields[idx])
 #endif
