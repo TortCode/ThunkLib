@@ -2,28 +2,28 @@
 #define THUNKLIB__CORE__UTILS__MEM_H
 
 #define DECLPTR(type, var) \
-type* var = malloc(sizeof (type))
+type* var = (type*) malloc(sizeof (type))
 
 #define TFREE(var) \
-free((MThunk*)var)
+free((Core::Thunks::MThunk*)var)
 
 /*MEMORY MANAGEMENT
  *Use instead of directly calling reference counter functions
  */
 #define wparam(thunk,body) \
-Thunk_Incref(thunk); \
+Core::Thunks::Incref(thunk); \
 body \
-Thunk_Decref(thunk); \
+Core::Thunks::Decref(thunk); \
 thunk = NULL;
 
 #define wparamas(thunk, def, body) \
-Thunk* thunk = def \
+Core::Thunks::Thunk* thunk = def \
 wparam(thunk, body)
 
-#define TOMUT(froz) ((MThunk*) froz)
+#define TOMUT(froz) ((Core::Thunks::MThunk*) froz)
 
 #define ASMUT(mut, froz) \
-MThunk* mut = TOMUT(froz)
+Core::Thunks::MThunk* mut = TOMUT(froz)
 
 /* argument counting macro
  * usage: PP_NARG(varargs)

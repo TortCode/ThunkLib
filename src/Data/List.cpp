@@ -1,9 +1,12 @@
 #include "List.h"
 
+
+
 CONSTRUCTOR(Nil, 0)
 CONSTRUCTOR(Cons, 2)
 
-static EXEC_SIG(map_func, args) {
+static EXECUTOR_SIG(map_func, args) {
+    using namespace THUNK_NAMESPACE;
     Thunk *f = args[0], *l = args[1];
     caseof(l) {
         pat(Nil):
@@ -17,7 +20,8 @@ static EXEC_SIG(map_func, args) {
 
 GETFUNC(map, map_func, 2)
 
-static EXEC_SIG(filter_func, args) {
+static EXECUTOR_SIG(filter_func, args) {
+    using namespace THUNK_NAMESPACE;
     Thunk *p = args[0]; Thunk *l = args[1];
     caseof(l) {
         pat(Nil): {
@@ -36,7 +40,8 @@ static EXEC_SIG(filter_func, args) {
 
 GETFUNC(filter, filter_func, 2)
 
-static EXEC_SIG(foldl_func, args) {
+static EXECUTOR_SIG(foldl_func, args) {
+    using namespace THUNK_NAMESPACE;
     Thunk *f = args[0], *acc = args[1], *l = args[2];
 #ifdef DEBUG
     printf("acc: %d \n", expose(Int32, acc));
@@ -54,7 +59,8 @@ static EXEC_SIG(foldl_func, args) {
 
 GETFUNC(foldl, foldl_func, 3)
 
-static EXEC_SIG(foldr_func, args) {
+static EXECUTOR_SIG(foldr_func, args) {
+    using namespace THUNK_NAMESPACE;
     Thunk *f = args[0], *acc = args[1], *l = args[2];
     caseof(l) {
         pat(Nil): {

@@ -1,19 +1,19 @@
 cmake_minimum_required(VERSION 3.21)
-project(ThunkLib C)
+project(ThunkLib)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(src/Data)
 include_directories(src)
 
 add_executable(ThunkLib
-        src/Data/List.c
+        src/Data/List.cpp
         src/Data/List.h
         src/Core/Utils.h
-        src/main.c
-        src/Core/Primitive.c
+        src/main.cpp
+        src/Core/Primitive.cpp
         src/Core/Primitive.h
-        src/Core/Thunk.c
+        src/Core/Thunk.cpp
         src/Core/Thunk.h
         src/Core/Utils/Mem.h
         src/Core/Utils/Lang.h

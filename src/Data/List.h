@@ -8,15 +8,12 @@ enum List{
     CON2TAG(Cons)
 };
 
-CONSTRUCTOR_DECL(Nil)
-CONSTRUCTOR_DECL(Cons)
+CONSTRUCTOR_DECL(Nil);
+CONSTRUCTOR_DECL(Cons);
 
-GETFUNC_DECL(map)
-
-GETFUNC_DECL(filter)
-
-GETFUNC_DECL(foldl)
-
-GETFUNC_DECL(foldr)
+GETFUNC_DECL(map);
+GETFUNC_DECL(filter);
+GETFUNC_DECL(foldl);
+GETFUNC_DECL(foldr);
 
 #endif
