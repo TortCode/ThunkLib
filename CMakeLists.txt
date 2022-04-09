@@ -9,9 +9,9 @@ include_directories(src)
 add_executable(ThunkLib
         data/list.c
         data/list.h
-        src/utils.h
+        src/core/utils.h
         src/main.c
-        src/primitive.c
-        src/primitive.h
-        src/thunk.c
-        src/thunk.h)
+        src/core/primitive.c
+        src/core/primitive.h
+        src/core/thunk.c
+        src/core/thunk.h src/core/utils/mem_utils.h src/core/utils/lang_utils.h src/core.h)

@@ -1,8 +1,8 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "thunk.h"
-#include "utils.h"
+#include "core/thunk.h"
+#include "core/utils.h"
 
 enum List{
     CON2TAG(Nil),

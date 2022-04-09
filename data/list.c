@@ -1,5 +1,5 @@
 #include "list.h"
-#include "primitive.h"
+#include "core/primitive.h"
 #include <stdio.h>
 
 CONSTRUCTOR(Nil, 0)
@@ -64,9 +64,7 @@ static EXEC_SIG(foldr_func, args) {
         }
         pat(Cons): {
             Thunk *x = get(l, 0), *xs = get(l, 1);
-            return mulap(f, 2,
-                         x,
-                         mulap(foldr(), f, acc, xs));
+            return mulap(f, x, mulap(foldr(), f, acc, xs));
         }
     }
 }
