@@ -36,10 +36,8 @@ namespace Core::Thunks
         Size _tag;
         Size _fieldc;
         Thunk **_fields;
-
-
     };
-    inline Value *Construct(Size tag, Size fieldc, Thunk **fields);
+    Value *Construct(Size tag, Size fieldc, Thunk **fields);
 
     /* ALMIGHTY THUNK
      * A structure lazily representing partially applied functions
@@ -68,7 +66,7 @@ namespace Core::Thunks
      * Incref should also be called at the beginning of a function with any Thunk parameters
      * EXCEPT if that function is part of a Thunk, since a Thunk manages its own arguments
      */
-    inline void Incref(Thunk *);
+    void Incref(Thunk *);
 
     /* REFERENCE DECREMENT
      * call Decref after a thunk is no longer needed for computation
@@ -76,7 +74,7 @@ namespace Core::Thunks
      * DO NOT CALL on thunks returned from function
      * EXCEPT if that function is part of a Thunk, since a Thunk manages its own arguments
      */
-    inline void Decref(Thunk *);
+    void Decref(Thunk *);
 
     /* THUNK CREATOR
      * f: function

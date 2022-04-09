@@ -13,9 +13,9 @@ namespace Core::Primitive
 #define VEXPOSE(type) Value_Expose ## type
         //Definitions
 #define WRAPINTO_VAL(base, type) \
-    static inline THUNK_NAMESPACE::Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
+    static THUNK_NAMESPACE::Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
 #define EXPOSEFROM_VAL(base, type) \
-    static inline type VEXPOSE(type) (THUNK_NAMESPACE::Value *v) { return VEXPOSE(base)(v); }
+    static type VEXPOSE(type) (THUNK_NAMESPACE::Value *v) { return VEXPOSE(base)(v); }
 #define BOX_VALUE(base, type) WRAPINTO_VAL(base, type) EXPOSEFROM_VAL(base, type)
 
 
@@ -24,8 +24,8 @@ namespace Core::Primitive
 #define PWRAP(type) Wrap ## type
 #define PEXPOSE(type) Expose ## type
         //Declarations
-#define WRAP_DECL(type) inline THUNK_NAMESPACE::Thunk* PWRAP(type)(type);
-#define EXPOSE_DECL(type) inline type PEXPOSE(type)(THUNK_NAMESPACE::Thunk*);
+#define WRAP_DECL(type) THUNK_NAMESPACE::Thunk* PWRAP(type)(type);
+#define EXPOSE_DECL(type) type PEXPOSE(type)(THUNK_NAMESPACE::Thunk*);
 #define BOX_DECL(type) WRAP_DECL(type) EXPOSE_DECL(type)
 
     BOX_DECL(Int8)  BOX_DECL(Int16) BOX_DECL(Int32) BOX_DECL(Int64)
@@ -35,7 +35,7 @@ namespace Core::Primitive
     BOX_DECL(Char)
         //Definitions
 #define WRAPPER(type) \
-    extern inline THUNK_NAMESPACE::Thunk* PWRAP(type)(type r) { \
+    THUNK_NAMESPACE::Thunk* PWRAP(type)(type r) { \
         using namespace THUNK_NAMESPACE;        \
         Value *v = VWRAP(type)(r);              \
         Thunk *t = WrapValue(v);         \
@@ -43,7 +43,7 @@ namespace Core::Primitive
         return t; \
     }
 #define EXPOSER(type) \
-    extern inline type PEXPOSE(type)(Thunk *v) { \
+    type PEXPOSE(type)(Thunk *v) { \
         using namespace THUNK_NAMESPACE;              \
         wparam(v, \
             type t = VEXPOSE(type)(ExposeValue(v)); \

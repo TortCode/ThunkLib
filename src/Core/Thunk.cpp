@@ -36,14 +36,14 @@ namespace Core::Thunks {
         TFREE(v->_fields);
     }
 
-    extern inline void Incref(Thunk *t) {
+    void Incref(Thunk *t) {
         ++TOMUT(t)->_refct;
 #ifdef REF_DEBUG
         printf("INCREF @ %d New Count: %d \n", (int) t, t->_refct);
 #endif
     }
 
-    extern inline void Decref(Thunk *t) {
+    void Decref(Thunk *t) {
 #ifdef REF_DEBUG
         printf("DECREF @ %d New Count: %d \n", (int) t, t->_refct-1);
 #endif
@@ -194,7 +194,7 @@ namespace Core::Thunks {
         return v;
     }
 
-    extern inline Value *Construct(Size tag, Size fieldc, Thunk **fields) {
+    Value *Construct(Size tag, Size fieldc, Thunk **fields) {
         DECLPTR(Value, v);
         v->_tag = tag;
         v->_fieldc = fieldc;
