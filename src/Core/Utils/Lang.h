@@ -28,41 +28,45 @@ body \
 va_end(name);
 
 #define GETFUNC(name, func, arity) \
-GETFUNC_DECL(name) {                \
+decl_func(name) {                \
     static qThunk* f = NULL; \
-    if (!f) qt(Incref)(f = qt(WrapFunc)(q(func), arity)); \
+    if (!f) qt(Incref)(f = qt(WrapFunc)(func, arity)); \
     return f; \
 }
 
-#define GETFUNC_DECL(name) qThunk* q(name)()
+#define decl_func(name) qThunk* q(name)()
 
 #define MK_THUNK(val) Make ## val
 
-#define data(type) enum q(CAT(MG_INFIX,CAT(type, _adt))
+#define data(type) enum q(CAT(MG_INFIX,CAT(type, _adt)))
 
-#define con_as_tag(con) CAT(MG_INFIX, CAT(con, _tag))
+#define tag(con) CAT(MG_INFIX, CAT(con, _tag))
+
+#define qtag(con) q(tag(con))
 
 #define BACKING_FUNC(f) q(CAT(MG_INFIX, CAT(f, _func)))
 
-#define EXECUTOR_SIG(name, args) qThunk *q(name)(qThunk **args)
+#define EXECUTOR_SIG(name, args) qThunk *name(qThunk **args)
 
 #define define_func(name, arity, args, ...)   \
 static EXECUTOR_SIG(BACKING_FUNC(name), args) \
 {                                             \
     __VA_ARGS__                               \
 }                                             \
-GETFUNC(name, BACKING_FUNC(name), arity);
+GETFUNC(name, BACKING_FUNC(name), arity)
 
-#define caseof(t) switch (tag(t))
+#define caseof(t) switch (qt(Eval)(t)->_val._tag)
 
-#define pat(base, con) case qualify(base, con_as_tag(con))
+#define qpat(con) case q(tag(con))
 
-#define tag(t) qt(Eval)(t)->_val._tag
+#define pat(base, con) case qualify(base, tag(con))
 
-#define CONSTRUCTOR_DECL(val) EXECUTOR_SIG(q(MK_THUNK(val)), args)
+#define decl_constructor(val) EXECUTOR_SIG(q(MK_THUNK(val)), args)
 
-#define CONSTRUCTOR(type, con, len)                   \
-CONSTRUCTOR_DECL(con) { return qt(WrapValue)(qt(Construct)(q(con_as_tag(con)), len, args)); }
+#define constructor(type, con, len)                   \
+decl_constructor(con) { return qt(WrapValue)(qt(Construct)(q(tag(con)), len, args)); }
+
+#define qmk(con, ...) mk(namespace, con, __VA_OPT__(,) __VA_ARGS__)
 
 #define mk(base, con, ...) qualify(base, MK_THUNK(con))(qt(List_FromVA)(PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__))
 
@@ -70,9 +74,9 @@ CONSTRUCTOR_DECL(con) { return qt(WrapValue)(qt(Construct)(q(con_as_tag(con)), l
 
 #define mulap(f, ...) qt(MultiApply)(f, PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__)
 
-#define ACCESSOR_DECL(name) qThunk *Get ## name(qt(Value)*);
-#define ACCESSOR(type, name, idx) \
-qThunk *Get ## name(qt(Value) *v) { \
+#define decl_accessor(name) qThunk *q(Get ## name)(qt(Value)* v);
+#define accessor(type, name, idx) \
+decl_accessor(name) { \
     return v->fields[qualify(base,con_as_tag)(idx)]; \
 }
 

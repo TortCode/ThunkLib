@@ -3,26 +3,26 @@
 
 #include "Core.h"
 
+#define namespace qualify(Data, List)
 
-namespace Data::List
+data(List)
 {
-    data(List)
-    {
-        con_as_tag(Nil),
-        con_as_tag(Cons)
-    };
+    qtag(Nil),
+    qtag(Cons)
+};
 
-    CONSTRUCTOR_DECL(Nil);
+decl_constructor(Nil);
 
-    CONSTRUCTOR_DECL(Cons);
+decl_constructor(Cons);
 
-    GETFUNC_DECL(map);
+decl_func(map);
 
-    GETFUNC_DECL(filter);
+decl_func(filter);
 
-    GETFUNC_DECL(foldl);
+decl_func(foldl);
 
-    GETFUNC_DECL(foldr);
-}
+decl_func(foldr);
+
+#undef namespace
 
 #endif

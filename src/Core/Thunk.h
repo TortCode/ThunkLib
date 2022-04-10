@@ -90,7 +90,7 @@ void q(Decref)(qThunk *);
  */
 qThunk *q(Apply)(qThunk *f, qThunk *x);
 
-#define ap q(Apply)
+#define ap qt(Apply)
 
 /* THUNK CREATOR
  * f: function

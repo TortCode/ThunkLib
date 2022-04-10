@@ -7,33 +7,33 @@
 #define namespace OPERNS
 
 #define DECL_FORALLNUMS(name) \
-GETFUNC_DECL(name ## S);      \
-GETFUNC_DECL(name ## I);      \
-GETFUNC_DECL(name ## L);      \
-GETFUNC_DECL(name ## F);      \
-GETFUNC_DECL(name ## D);      \
+decl_func(name ## S);      \
+decl_func(name ## I);      \
+decl_func(name ## L);      \
+decl_func(name ## F);      \
+decl_func(name ## D);      \
 
 //Declarations of builtin functions
 DECL_FORALLNUMS(ainv)
-GETFUNC_DECL(neg);
+decl_func(neg);
 
 DECL_FORALLNUMS(add)
 DECL_FORALLNUMS(sub)
 DECL_FORALLNUMS(mul)
 DECL_FORALLNUMS(div)
-GETFUNC_DECL(modI); GETFUNC_DECL(modL);
+decl_func(modI); decl_func(modL);
 
-GETFUNC_DECL(conj);
-GETFUNC_DECL(disj);
-GETFUNC_DECL(eq);
-GETFUNC_DECL(neq);
-GETFUNC_DECL(lt);
-GETFUNC_DECL(lte);
-GETFUNC_DECL(gt);
-GETFUNC_DECL(gte);
+decl_func(conj);
+decl_func(disj);
+decl_func(eq);
+decl_func(neq);
+decl_func(lt);
+decl_func(lte);
+decl_func(gt);
+decl_func(gte);
 
-GETFUNC_DECL(compose);
-GETFUNC_DECL(app);
+decl_func(compose);
+decl_func(app);
 
 #undef namespace
 
