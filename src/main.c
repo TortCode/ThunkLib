@@ -1,12 +1,12 @@
 #include <cstdio>
-#include "Base.h"
+#include "Core.h"
 #include "Data/List.h"
 
-using namespace THUNK_NAMESPACE;
+
 #define offset(type, field) &(((type*)0)->field)
 
 int main(void) {
-    puts(COMPILER_ID);
+    puts(STR(MG_INFIX));
 //	Thunk* neg = negI();
 //	int i = 0;
 //	int j = 0;

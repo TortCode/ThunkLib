@@ -1,8 +1,25 @@
 #ifndef THUNKLIB__CORE__UTILS__LANG_H
 #define THUNKLIB__CORE__UTILS__LANG_H
 
-#define THUNK_NAMESPACE Core::Thunks
-#define PRIMITIVE_NAMESPACE Core::Primitive
+
+#define MG_INFIX __JAVASUCKS_Cftw__
+
+/* qualify(p,c)
+ * returns the name created by joining namespace p and c together
+ */
+#define qualify(p,c) CAT(p, CAT(MG_INFIX, c))
+#define CAT(a,b) _CAT(a,b)
+#define _CAT(a,b) a ## b
+
+#define __NAMESPACE__ namespace
+
+#define THUNKNS qualify(Core, Thunk)
+#define PRIMNS qualify(Core, Primitive)
+#define OPERNS qualify(Core, Operator)
+#define qt(x) qualify(THUNKNS, x)
+#define qp(x) qualify(PRIMNS, x)
+#define q(x) qualify(__NAMESPACE__, x)
+#define qThunk qt(Thunk)
 
 #define WVARARGS(name, lreqvar, body) \
 va_list name; \
@@ -11,26 +28,23 @@ body \
 va_end(name);
 
 #define GETFUNC(name, func, arity) \
-GETFUNC_DECL(name) {              \
-    using namespace THUNK_NAMESPACE;             \
-    static Thunk* f = NULL; \
-    if (!f) Incref(f = WrapFunc(func, arity)); \
+GETFUNC_DECL(name) {                \
+    static qThunk* f = NULL; \
+    if (!f) qt(Incref)(f = qt(WrapFunc)(q(func), arity)); \
     return f; \
 }
 
-#define GETFUNC_DECL(name) THUNK_NAMESPACE::Thunk* name()
+#define GETFUNC_DECL(name) qThunk* q(name)()
 
 #define MK_THUNK(val) Make ## val
 
-#define MANGLE_ADT(type) __ ## type ## _type
+#define data(type) enum q(CAT(MG_INFIX,CAT(type, _adt))
 
-#define data(type) enum struct MANGLE_ADT(type) : THUNK_NAMESPACE::Size
+#define con_as_tag(con) CAT(MG_INFIX, CAT(con, _tag))
 
-#define con_as_tag(con) __ ## con ## _tag
+#define BACKING_FUNC(f) q(CAT(MG_INFIX, CAT(f, _func)))
 
-#define BACKING_FUNC(f) __ ## f ## _func
-
-#define EXECUTOR_SIG(name, args) THUNK_NAMESPACE::Thunk *name(THUNK_NAMESPACE::Thunk **args)
+#define EXECUTOR_SIG(name, args) qThunk *q(name)(qThunk **args)
 
 #define define_func(name, arity, args, ...)   \
 static EXECUTOR_SIG(BACKING_FUNC(name), args) \
@@ -41,28 +55,28 @@ GETFUNC(name, BACKING_FUNC(name), arity);
 
 #define caseof(t) switch (tag(t))
 
-#define pat(type,con) case (THUNK_NAMESPACE::Size) MANGLE_ADT(type)::con_as_tag(con)
+#define pat(base, con) case qualify(base, con_as_tag(con))
 
-#define tag(t) THUNK_NAMESPACE::Eval(t)->_val._tag
+#define tag(t) qt(Eval)(t)->_val._tag
 
-#define CONSTRUCTOR_DECL(val) EXECUTOR_SIG(MK_THUNK(val), args)
+#define CONSTRUCTOR_DECL(val) EXECUTOR_SIG(q(MK_THUNK(val)), args)
 
 #define CONSTRUCTOR(type, con, len)                   \
-CONSTRUCTOR_DECL(con) { return THUNK_NAMESPACE::WrapValue(THUNK_NAMESPACE::Construct((THUNK_NAMESPACE::Size)MANGLE_ADT(type)::con_as_tag(con), len, args)); }
+CONSTRUCTOR_DECL(con) { return qt(WrapValue)(qt(Construct)(q(con_as_tag(con)), len, args)); }
 
-#define mk(con, ...) MK_THUNK(con)(THUNK_NAMESPACE::List_FromVA(PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__))
+#define mk(base, con, ...) qualify(base, MK_THUNK(con))(qt(List_FromVA)(PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__))
 
 #define opap(x, f, ...) mulap(f, x, __VA_ARGS__)
 
-#define mulap(f, ...) THUNK_NAMESPACE::MultiApply(f, PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__)
+#define mulap(f, ...) qt(MultiApply)(f, PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__)
 
-#define ACCESSOR_DECL(name) THUNK_NAMESPACE::Thunk *Get ## name(THUNK_NAMESPACE::Value*);
+#define ACCESSOR_DECL(name) qThunk *Get ## name(qt(Value)*);
 #define ACCESSOR(type, name, idx) \
-THUNK_NAMESPACE::Thunk *Get ## name(THUNK_NAMESPACE::Value *v) { \
-    return v->fields[MANGLE_ADT(type)::con_as_tag(idx)]; \
+qThunk *Get ## name(qt(Value) *v) { \
+    return v->fields[qualify(base,con_as_tag)(idx)]; \
 }
 
-#define mkstruct(tag, fieldc, ...) THUNK_NAMESPACE::WrapValue(THUNK_NAMESPACE::Construct(tag, fieldc, __VA_ARGS__))
+#define mkstruct(tag, fieldc, ...) qt(WrapValue)(qt(Construct)(tag, fieldc, __VA_ARGS__))
 
 #ifdef DEBUG
 #define get(thunk, idx) (!((thunk)->_val)? fprintf(stderr, "%s not fully evaluated yet!", # thunk) : (thunk)->_val._fields[idx])
