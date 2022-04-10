@@ -1,24 +1,12 @@
 #include <cstdio>
-#include "Core.h"
+#include "Base.h"
 #include "Data/List.h"
 
 using namespace THUNK_NAMESPACE;
 #define offset(type, field) &(((type*)0)->field)
 
 int main(void) {
-    printf("%ld \n", sizeof(int));
-    printf("refct: %p \n", offset(Thunk, _refct));
-    printf("primal: %p \n", offset(Thunk, _primal));
-    printf("func: %p \n", offset(Thunk, _func));
-    printf("arity: %p \n", offset(Thunk, _arity));
-    printf("argc: %p \n", offset(Thunk, _argc));
-    printf("args: %p \n", offset(Thunk, _args));
-    printf("val: %p \n", offset(Thunk, _val));
-    printf("%ld \n", sizeof(Thunk));
-    Thunk *t= wrap(Int32, 1);
-
-    Construct(0,0,0);
-Thunk* sum = Core::Primitive::addI();
+    puts(COMPILER_ID);
 //	Thunk* neg = negI();
 //	int i = 0;
 //	int j = 0;

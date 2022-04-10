@@ -162,7 +162,7 @@ namespace Core::Thunks {
         return rv;
     }
 
-    Thunk *WrapFunc(Executor func, Size arity) {
+    Thunk *WrapFunc(Executor func, Diff arity) {
         DECLPTR(MThunk, caller);
         caller->_refct = 0;
 #ifdef ARITY_DEBUG

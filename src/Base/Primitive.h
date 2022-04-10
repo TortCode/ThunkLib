@@ -4,8 +4,8 @@
 
 namespace Core::Primitive
 {
-#define wrap(type, val) PRIMITIVE_NAMESPACE::PWRAP(type)(val)
-#define expose(type, val) PRIMITIVE_NAMESPACE::PEXPOSE(type)(val)
+#define wrap(type, val) PRIMITIVE_NAMESPACE::TWRAP(type)(val)
+#define expose(type, val) PRIMITIVE_NAMESPACE::TEXPOSE(type)(val)
 
     //Boxes and unboxes primitive types into Values
         //Shorthands
@@ -21,11 +21,11 @@ namespace Core::Primitive
 
     //Box and unboxes Values into Thunks
         //Shorthands
-#define PWRAP(type) Wrap ## type
-#define PEXPOSE(type) Expose ## type
+#define TWRAP(type) Thunk_Wrap ## type
+#define TEXPOSE(type) Thunk_Expose ## type
         //Declarations
-#define WRAP_DECL(type) THUNK_NAMESPACE::Thunk* PWRAP(type)(type);
-#define EXPOSE_DECL(type) type PEXPOSE(type)(THUNK_NAMESPACE::Thunk*);
+#define WRAP_DECL(type) THUNK_NAMESPACE::Thunk* TWRAP(type)(type);
+#define EXPOSE_DECL(type) type TEXPOSE(type)(THUNK_NAMESPACE::Thunk*);
 #define BOX_DECL(type) WRAP_DECL(type) EXPOSE_DECL(type)
 
     BOX_DECL(Int8)  BOX_DECL(Int16) BOX_DECL(Int32) BOX_DECL(Int64)
@@ -35,7 +35,7 @@ namespace Core::Primitive
     BOX_DECL(Char)
         //Definitions
 #define WRAPPER(type) \
-    THUNK_NAMESPACE::Thunk* PWRAP(type)(type r) { \
+    THUNK_NAMESPACE::Thunk* TWRAP(type)(type r) { \
         using namespace THUNK_NAMESPACE;        \
         Value *v = VWRAP(type)(r);              \
         Thunk *t = WrapValue(v);         \
@@ -43,7 +43,7 @@ namespace Core::Primitive
         return t; \
     }
 #define EXPOSER(type) \
-    type PEXPOSE(type)(Thunk *v) { \
+    type TEXPOSE(type)(Thunk *v) { \
         using namespace THUNK_NAMESPACE;              \
         wparam(v, \
             type t = VEXPOSE(type)(ExposeValue(v)); \

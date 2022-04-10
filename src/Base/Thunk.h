@@ -22,7 +22,8 @@ typedef char Char;
 
 namespace Core::Thunks
 {
-    typedef Int64 Size;
+    typedef UInt64 Size;
+    typedef Int64 Diff;
     typedef const struct thunk_t Thunk;
     typedef struct thunk_t MThunk;
     typedef Thunk *(*Executor)(Thunk**);
@@ -50,7 +51,7 @@ namespace Core::Thunks
         union {
             struct {
                 Executor _func;
-                Size _arity;
+                Diff _arity;
                 Size _argc;
                 Thunk **_args;
             };
@@ -100,7 +101,7 @@ namespace Core::Thunks
      * func: thunk-valued function that accepts array of thunks
      * returns func wrapped in a thunk
      */
-    Thunk *WrapFunc(Executor, Size);
+    Thunk *WrapFunc(Executor, Diff);
 
     /* THUNK CREATOR & VALUE BOXER
      * Data: algebraic datatype value
