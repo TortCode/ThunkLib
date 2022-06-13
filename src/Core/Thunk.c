@@ -60,6 +60,7 @@ void q(Decref)(qThunk *t) {
     }
 }
 
+
 static qThunk *MoveResult(qThunk *dest, qThunk *src) {
 #define md (TOMUT(dest))
 #define ms (TOMUT(src))

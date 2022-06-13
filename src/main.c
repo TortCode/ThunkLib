@@ -7,7 +7,7 @@
 
 int main(void) {
     puts(STR(MG_INFIX));
-//	Thunk* neg = negI();
+//Thunk* neg = negI();
 //	int i = 0;
 //	int j = 0;
 //    scanf("%d", &i);
