@@ -28,7 +28,9 @@ typedef UInt64 q(Size);
 typedef Int64 q(Diff);
 typedef const struct q(thunk_t) q(Thunk);
 typedef struct q(thunk_t) q(MThunk);
-typedef qThunk *(*q(Executor))(qThunk**);
+
+typedef qThunk *(*q(Executor))(qThunk **);
+
 typedef struct q(value_t) q(Value);
 
 #define qValue qt(Value)
@@ -39,11 +41,13 @@ typedef struct q(value_t) q(Value);
  * Represents a combination of Product(tuple) and Sum(tagged union) types
  * All ADTs normalize to a Sum of Product types, encoded here as a tagged array of Thunks
  */
-struct q(value_t) {
+struct q(value_t)
+{
     qSize _tag;
     qSize _fieldc;
     qThunk **_fields;
 };
+
 qValue *q(Construct)(qSize tag, qSize fieldc, qThunk **fields);
 
 /* ALMIGHTY THUNK
@@ -51,11 +55,14 @@ qValue *q(Construct)(qSize tag, qSize fieldc, qThunk **fields);
  * When evaluated at full arity, they move assign the result to themselves
  * Primitive thunks contain a constant value of an Algebraic DataType
  */
-struct q(thunk_t) {
+struct q(thunk_t)
+{
     qSize _refct;
     Bool _primal;
-    union {
-        struct {
+    union
+    {
+        struct
+        {
             q(Executor) _func;
             qDiff _arity;
             qSize _argc;

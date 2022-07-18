@@ -2,7 +2,7 @@
 #define THUNKLIB__CORE__UTILS__LANG_H
 
 
-#define MG_INFIX __JAVASUCKS_Cftw__
+#define MG_INFIX __PUREC4LIFE__
 
 /* qualify(p,c)
  * returns the name created by joining namespace p and c together
@@ -22,16 +22,17 @@
 #define qThunk qt(Thunk)
 
 #define WVARARGS(name, lreqvar, body) \
-va_list name; \
-va_start(name, lreqvar); \
-body \
+va_list name;                         \
+va_start(name, lreqvar);              \
+body                                  \
 va_end(name);
 
-#define GETFUNC(name, func, arity) \
-decl_func(name) {                \
-    static qThunk* f = NULL; \
-    if (!f) qt(Incref)(f = qt(WrapFunc)(func, arity)); \
-    return f; \
+#define GETFUNC(name, func, arity)                      \
+decl_func(name)                                         \
+{                                                       \
+    static qThunk* f = NULL;                            \
+    if (!f) qt(Incref)(f = qt(WrapFunc)(func, arity));  \
+    return f;                                           \
 }
 
 #define decl_func(name) qThunk* q(name)()
