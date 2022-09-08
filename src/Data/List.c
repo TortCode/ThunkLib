@@ -1,7 +1,7 @@
 #include "List.h"
 
 
-#define namespace qualify(Data, List)
+#define namespace qu(Data, List)
 
 constructor(List, Nil, 0)
 

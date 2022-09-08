@@ -2,7 +2,8 @@
 #define THUNKLIB__CORE__PRIMITIVE_H
 #include "Thunk.h"
 
-#define namespace PRIMNS
+#define namespace qu(Core, Primitive)
+#define PRIMNS qu(Core, Primitive)
 
 #define wrap(type, val) TWRAP(type)(val)
 #define expose(type, val) TEXPOSE(type)(val)

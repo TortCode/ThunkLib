@@ -3,7 +3,7 @@
 
 #include "Core.h"
 
-#define namespace qualify(Data, List)
+#define namespace qu(Data, List)
 
 data(List)
 {

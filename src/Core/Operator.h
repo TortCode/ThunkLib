@@ -4,7 +4,8 @@
 #include "Utils.h"
 #include "Primitive.h"
 
-#define namespace OPERNS
+#define namespace qu(Core, Operator)
+#define OPERNS qu(Core, Operator)
 
 #define DECL_FORALLNUMS(name) \
 decl_func(name ## S);      \

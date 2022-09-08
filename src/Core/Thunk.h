@@ -22,7 +22,8 @@ typedef bool Bool;
 typedef char Char;
 
 
-#define namespace THUNKNS
+#define namespace qu(Core, Thunk)
+#define THUNKNS qu(Core, Thunk)
 
 typedef UInt64 q(Size);
 typedef Int64 q(Diff);

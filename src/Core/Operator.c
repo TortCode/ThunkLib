@@ -37,7 +37,7 @@ BINOP(lte, Bool, <=)
 BINOP(gt, Bool, >)
 BINOP(gte, Bool, >=)
 
-define_func(compose, 3, args, return qt(Apply)(args[0], Apply(args[1], args[2])); )
+define_func(compose, 3, args, return qt(Apply)(args[0], qt(Apply)(args[1], args[2])); )
 define_func(app, 2, args, return qt(Apply)(args[0], args[1]); )
 
 #undef namespace
