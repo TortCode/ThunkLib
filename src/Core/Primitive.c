@@ -3,34 +3,21 @@
 #define namespace PRIMNS
 
 #define VWRAP_SIG(type, var) \
-static qValue *VWRAP(type)(type var)
+static Value *VWRAP(type)(type var)
 #define VEXPOSE_SIG(type, var) \
-static type VEXPOSE(type)(qValue *var)
+static type VEXPOSE(type)(Value *var)
 
-static qValue *Value_WrapInt32(Int32);
-static Int32 Value_ExposeInt32(qValue*);
+static Value *Value_WrapInt64(Int64);
+static Int64 Value_ExposeInt64(Value*);
 
-BOX_VALUE(Int32, Int8)
-BOX_VALUE(Int32, Int16)
-VWRAP_SIG(Int32, i) {
-    DECLPTR(qValue, data);
-    data->_tag = i;
-    data->_fieldc = 0;
-    data->_fields = NULL;
-    return data;
-}
-VEXPOSE_SIG(Int32, v) { return v->_tag; }
-VWRAP_SIG(Int64, l) {
-    DECLPTR(qValue, data);
-    data->_tag = l;
-    data->_fieldc = 0;
-    data->_fields = NULL;
-    return data;
-}
-VEXPOSE_SIG(Int64, v) { return v->_tag; }
-BOX_VALUE(Int32, UInt8)
-BOX_VALUE(Int32, UInt16)
-BOX_VALUE(Int32, UInt32)
+BOX_VALUE(Int64, Int8)
+BOX_VALUE(Int64, Int16)
+BOX_VALUE(Int64, Int32)
+VWRAP_SIG(Int64, l) { return qt(Construct)(l, 0, NULL); }
+VEXPOSE_SIG(Int64, v) { return qt(Tag)(v); }
+BOX_VALUE(Int64, UInt8)
+BOX_VALUE(Int64, UInt16)
+BOX_VALUE(Int64, UInt32)
 BOX_VALUE(Int64, UInt64)
 VWRAP_SIG(Float32, f) { return Value_WrapInt32(*((Int32 *)&f)); }
 VEXPOSE_SIG(Float32, v) { Int32 i = Value_ExposeInt32(v); return *((Float32 *) &i); }

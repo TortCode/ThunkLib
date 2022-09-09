@@ -14,9 +14,9 @@
 #define VEXPOSE(type) Value_Expose ## type
     //Definitions
 #define WRAPINTO_VAL(base, type) \
-static qValue *VWRAP(type) (type t) { return VWRAP(base)(t); }
+static Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
 #define EXPOSEFROM_VAL(base, type) \
-static type VEXPOSE(type) (qValue *v) { return VEXPOSE(base)(v); }
+static type VEXPOSE(type) (Value *v) { return VEXPOSE(base)(v); }
 #define BOX_VALUE(base, type) WRAPINTO_VAL(base, type) EXPOSEFROM_VAL(base, type)
 
 
@@ -25,8 +25,8 @@ static type VEXPOSE(type) (qValue *v) { return VEXPOSE(base)(v); }
 #define TWRAP(type) qp(Wrap ## type)
 #define TEXPOSE(type) qp(Expose ## type)
     //Declarations
-#define WRAP_DECL(type) qThunk* TWRAP(type)(type);
-#define EXPOSE_DECL(type) type TEXPOSE(type)(qThunk*);
+#define WRAP_DECL(type) Thunk* TWRAP(type)(type);
+#define EXPOSE_DECL(type) type TEXPOSE(type)(Thunk*);
 #define BOX_DECL(type) WRAP_DECL(type) EXPOSE_DECL(type)
 
 BOX_DECL(Int8)  BOX_DECL(Int16) BOX_DECL(Int32) BOX_DECL(Int64)
@@ -36,14 +36,14 @@ BOX_DECL(Bool)
 BOX_DECL(Char)
     //Definitions
 #define WRAPPER(type) \
-qThunk* TWRAP(type)(type r) { \
-    qValue *v = VWRAP(type)(r);              \
-    qThunk *t = qt(WrapValue)(v);         \
-    free(v);\
+Thunk* TWRAP(type)(type r) { \
+    Value *v = VWRAP(type)(r);              \
+    Thunk *t = qt(WrapValue)(v);         \
+    free(v); \
     return t; \
 }
 #define EXPOSER(type) \
-type TEXPOSE(type)(qThunk *v) { \
+type TEXPOSE(type)(Thunk *v) { \
     wparam(v, \
         type t = VEXPOSE(type)(qt(ExposeValue)(v)); \
     ) \
@@ -52,6 +52,4 @@ type TEXPOSE(type)(qThunk *v) { \
 #define BOX_THUNK(type) WRAPPER(type) EXPOSER(type)
 
 #undef namespace
-
-
 #endif

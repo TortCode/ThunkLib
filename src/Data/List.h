@@ -1,7 +1,7 @@
 #ifndef THUNKLIB__DATA__LIST_H
 #define THUNKLIB__DATA__LIST_H
 
-#include "Core.h"
+#include "idx.h"
 
 #define namespace qu(Data, List)
 

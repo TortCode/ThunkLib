@@ -1,7 +1,7 @@
 #ifndef THUNKLIB_OPERATOR_H
 #define THUNKLIB_OPERATOR_H
 
-#include "Utils.h"
+#include "idx.h"
 #include "Primitive.h"
 
 #define namespace qu(Core, Operator)

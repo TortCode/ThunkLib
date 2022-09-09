@@ -6,7 +6,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include "Utils.h"
+#include "Utils/idx.h"
 
 typedef int8_t Int8;
 typedef int16_t Int16;
@@ -21,58 +21,30 @@ typedef double Float64;
 typedef bool Bool;
 typedef char Char;
 
-
 #define namespace qu(Core, Thunk)
 #define THUNKNS qu(Core, Thunk)
 
-typedef UInt64 q(Size);
-typedef Int64 q(Diff);
-typedef const struct q(thunk_t) q(Thunk);
+typedef UInt64 Size;
+typedef Int64 Diff;
+typedef const struct q(thunk_t) Thunk;
 typedef struct q(thunk_t) q(MThunk);
 
-typedef qThunk *(*q(Executor))(qThunk **);
+typedef Thunk *(*q(Executor))(Thunk **);
 
-typedef struct q(value_t) q(Value);
-
-#define qValue qt(Value)
-#define qSize qt(Size)
-#define qDiff qt(Diff)
+typedef struct q(value_t) Value;
 
 /* ALGEBRAIC DATATYPE Value
  * Represents a combination of Product(tuple) and Sum(tagged union) types
  * All ADTs normalize to a Sum of Product types, encoded here as a tagged array of Thunks
  */
-struct q(value_t)
-{
-    qSize _tag;
-    qSize _fieldc;
-    qThunk **_fields;
-};
-
-qValue *q(Construct)(qSize tag, qSize fieldc, qThunk **fields);
+struct Value;
 
 /* ALMIGHTY THUNK
  * A structure lazily representing partially applied functions
  * When evaluated at full arity, they move assign the result to themselves
  * Primitive thunks contain a constant value of an Algebraic DataType
  */
-struct q(thunk_t)
-{
-    qSize _refct;
-    Bool _primal;
-    union
-    {
-        struct
-        {
-            q(Executor) _func;
-            qDiff _arity;
-            qSize _argc;
-            qThunk **_args;
-        };
-        qValue _val;
-    };
-
-};
+struct Thunk;
 
 
 /* REFERENCE INCREMENT
@@ -81,7 +53,7 @@ struct q(thunk_t)
  * Incref should also be called at the beginning of a function with any Thunk parameters
  * EXCEPT if that function is part of a Thunk, since a Thunk manages its own arguments
  */
-void q(Incref)(qThunk *);
+void q(Incref)(Thunk *);
 
 /* REFERENCE DECREMENT
  * call Decref after a thunk is no longer needed for computation
@@ -89,14 +61,14 @@ void q(Incref)(qThunk *);
  * DO NOT CALL on thunks returned from function
  * EXCEPT if that function is part of a Thunk, since a Thunk manages its own arguments
  */
-void q(Decref)(qThunk *);
+void q(Decref)(Thunk *);
 
 /* THUNK CREATOR
  * f: function
  * x: term
  * returns f partially applied to x
  */
-qThunk *q(Apply)(qThunk *f, qThunk *x);
+Thunk *q(Apply)(Thunk *f, Thunk *x);
 
 #define ap qt(Apply)
 
@@ -106,33 +78,38 @@ qThunk *q(Apply)(qThunk *f, qThunk *x);
  * x: array terms
  * returns f partially applied to all arguments in x
  */
-qThunk *q(MultiApply)(qThunk *f, qSize len, ...);
+Thunk *q(MultiApply)(Thunk *f, Size len, ...);
 
-qThunk *q(Eval)(qThunk *);
+Thunk *q(Eval)(Thunk *);
 
 /* THUNK CREATOR
  * arity: number of arguments that func requires
  * func: thunk-valued function that accepts array of thunks
  * returns func wrapped in a thunk
  */
-qThunk *q(WrapFunc)(q(Executor), qDiff);
+Thunk *q(WrapFunc)(q(Executor), Diff);
 
 /* THUNK CREATOR & VALUE BOXER
  * Data: algebraic datatype value
  * returns Data wrapped in a thunk
  */
-qThunk *q(WrapValue)(qValue *);
+Thunk *q(WrapValue)(Value *);
 
 /* VALUE UNBOXER
  * t: a thunk that can evaluate to a primal
  * returns the value residing in t
  */
-qValue *q(ExposeValue)(qThunk *);
+Value *q(ExposeValue)(Thunk *);
 
-qThunk **q(List_FromVA)(qSize len, ...);
+Thunk **q(List_FromVA)(Size len, ...);
 
-qThunk **q(ListFromVAList)(qSize len, va_list list);
+Thunk **q(ListFromVAList)(Size len, va_list list);
+
+Value *q(Construct)(Size tag, Size fieldc, Thunk **fields);
+
+Size q(Tag)(Value *v);
+
+Thunk *q(Fields)(Value *v, Size i);
 
 #undef namespace
-
 #endif

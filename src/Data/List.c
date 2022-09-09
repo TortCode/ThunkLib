@@ -9,7 +9,7 @@ constructor(List, Cons, 2)
 
 
 define_func(map, 2, args,
-    qThunk
+    Thunk
     *f = args[0],
     *l = args[1];
     caseof(l)
@@ -21,14 +21,14 @@ define_func(map, 2, args,
         qpat(Cons):
         {
             return qmk(Cons,
-                ap(f, get(l, 0)),
-                mulap(q(map)(), f, get(l, 1)));
+                ap(f, get(l, 1)),
+                mlp(q(map)(), f, get(l, 0)));
         }
     }
 )
 
 define_func(filter, 2, args,
-    qThunk
+    Thunk
     *p = args[0],
     *l = args[1];
     caseof(l)
@@ -41,17 +41,17 @@ define_func(filter, 2, args,
         {
             if (expose(Bool, ap(p, get(l, 0))))
             {
-                qThunk * x = get(l, 0), *xs = get(l, 1);
-                return qmk(Cons, x, mulap(q(filter)(), p, xs));
+                Thunk * x = get(l, 0), *xs = get(l, 1);
+                return qmk(Cons, x, mlp(q(filter)(), p, xs));
             }
             else
-                return mulap(q(filter)(), p, get(l, 1));
+                return mlp(q(filter)(), p, get(l, 1));
         }
     }
 )
 
 define_func(foldl, 3, args,
-    qThunk
+    Thunk
     *f = args[0],
     *acc = args[1],
     *l = args[2];
@@ -63,14 +63,14 @@ define_func(foldl, 3, args,
         }
         qpat(Cons):
         {
-            qThunk * x = get(l, 0), *xs = get(l, 1);
-            return mulap(q(foldl)(), f, mulap(f, acc, x), xs);
+            Thunk * x = get(l, 0), *xs = get(l, 1);
+            return mlp(q(foldl)(), f, mlp(f, acc, x), xs);
         }
     }
 )
 
 define_func(foldr, 3, args,
-    qThunk
+    Thunk
     *f = args[0],
     *acc = args[1],
     *l = args[2];
@@ -82,8 +82,8 @@ define_func(foldr, 3, args,
         }
         qpat(Cons):
         {
-            qThunk * x = get(l, 0), *xs = get(l, 1);
-            return mulap(f, x, mulap(q(foldr)(), f, acc, xs));
+            Thunk * x = get(l, 0), *xs = get(l, 1);
+            return mlp(f, x, mlp(q(foldr)(), f, acc, xs));
         }
     }
 )

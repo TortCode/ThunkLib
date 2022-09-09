@@ -4,56 +4,92 @@
 
 #define namespace THUNKNS
 
-qThunk **q(List_FromVA)(qSize len, ...) {
+struct q(value_t)
+{
+    Size _tag;
+    Size _fieldc;
+    Thunk **_fields;
+};
+
+struct q(thunk_t)
+{
+    Size _refct;
+    Bool _primal;
+    union
+    {
+        struct
+        {
+            q(Executor) _func;
+            Diff _arity;
+            Size _argc;
+            Thunk **_args;
+        };
+        Value _val;
+    };
+
+};
+
+Thunk **q(List_FromVA)(Size len, ...)
+{
     WVARARGS(list, len,
-        qThunk **arr = (qThunk **) malloc(len * sizeof(qThunk *));
-        for (qSize i = 0; i < len; ++i) {
-            q(Incref)(arr[i] = va_arg(list, qThunk * ));
+        Thunk **arr = (Thunk **) malloc(len * sizeof(Thunk *));
+        for (Size i = 0; i < len; ++i)
+        {
+            q(Incref)(arr[i] = va_arg(list, Thunk * ));
         }
     )
     return arr;
 }
 
-qThunk **q(ListFromVAList)(qSize len, va_list list) {
-    qThunk **arr = (qThunk **) malloc(len * sizeof(qThunk *));
-    for (qSize i = 0; i < len; ++i) {
-        q(Incref)(arr[i] = va_arg(list, qThunk*));
+Thunk **q(ListFromVAList)(Size len, va_list list)
+{
+    Thunk **arr = (Thunk **) malloc(len * sizeof(Thunk *));
+    for (Size i = 0; i < len; ++i)
+    {
+        q(Incref)(arr[i] = va_arg(list, Thunk *));
     }
     return arr;
 }
 
-static void DestroyArgs(qThunk *t) {
+static void DestroyArgs(Thunk *t)
+{
     if (!t->_args) return;
-    for (qSize i = 0; i < t->_argc; i++)
+    for (Size i = 0; i < t->_argc; i++)
         q(Decref)(t->_args[i]);
     TFREE(t->_args);
 }
 
-static void DecrefFields(qValue *v) {
+static void DecrefFields(Value *v)
+{
     if (!v->_fields) return;
-    for (qSize i = 0; i < v->_fieldc; i++)
+    for (Size i = 0; i < v->_fieldc; i++)
         q(Decref)(v->_fields[i]);
     TFREE(v->_fields);
 }
 
-void q(Incref)(qThunk *t) {
-    ++TOMUT(t)->_refct;
+inline void q(Incref)(Thunk *t)
+{
+    ++mut_cast(t)->_refct;
 #ifdef REF_DEBUG
     printf("INCREF @ %d New Count: %d \n", (int) t, t->_refct);
 #endif
 }
 
-void q(Decref)(qThunk *t) {
+void q(Decref)(Thunk *t)
+{
 #ifdef REF_DEBUG
     printf("DECREF @ %d New Count: %d \n", (int) t, t->_refct-1);
 #endif
     //printf("DECREF CALLED: %d \n",(int) t % 1000);
     //printf("%d\n", t->_refct-1);
-    if (--TOMUT(t)->_refct == 0) {
-
-        if (t->_primal) {
-            DecrefFields(&(TOMUT(t)->_val));
-        } else {
+    if (--mut_cast(t)->_refct == 0)
+    {
+        if (t->_primal)
+        {
+            DecrefFields(&(mut_cast(t)->_val));
+        }
+        else
+        {
             DestroyArgs(t);
         }
         TFREE(t);
@@ -61,16 +97,22 @@ void q(Decref)(qThunk *t) {
 }
 
 
-static qThunk *MoveResult(qThunk *dest, qThunk *src) {
-#define md (TOMUT(dest))
-#define ms (TOMUT(src))
-    if (md->_primal = ms->_primal) {
+static Thunk *MoveResult(Thunk *dest, Thunk *src)
+{
+#define md mut_cast(dest)
+#define ms mut_cast(src)
+    md->_primal = ms->_primal;
+    if (md->_primal)
+    {
         md->_val = ms->_val;
-    } else {
+    }
+    else
+    {
         // copy excess of old args
-        qSize xsargc = -dest->_arity;
-        ms->_args = (qThunk **) realloc(TOMUT(src->_args), (src->_argc + xsargc) * sizeof(qThunk *));
-        for (qSize i = 0; i < xsargc; i++) {
+        Diff xsargc = -dest->_arity;
+        ms->_args = (Thunk **) realloc(mut_cast(src->_args), (src->_argc + xsargc) * sizeof(Thunk *));
+        for (Size i = 0; i < xsargc; i++)
+        {
             // Need to balance with Decref from old arg destruction
             q(Incref)(ms->_args[src->_argc + i] = md->_args[dest->_argc - xsargc + i]);
         }
@@ -87,87 +129,102 @@ static qThunk *MoveResult(qThunk *dest, qThunk *src) {
     return dest;
 }
 
-qThunk *q(Eval)(qThunk *t) {
+Thunk *q(Eval)(Thunk *t)
+{
     if (t->_primal) return t;
-    else if (t->_arity <= 0) {
+    else if (t->_arity <= 0)
+    {
         return q(Eval)(MoveResult(t, t->_func(t->_args)));
     }
     return t;
 }
 
-qThunk *q(Apply)(qThunk *f, qThunk *x) {
+Thunk *q(Apply)(Thunk *f, Thunk *x)
+{
 #ifdef ARITY_DEBUG
-    if (f->_primal) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
+    if (f->_primal) { eprintf"Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
 #endif
     wparam(f,
     //memory management
         DECLPTR(q(MThunk), app);
-           app->_refct = 0;
-           app->_primal = false;
-           //copy func ptr
-           app->_func = f->_func;
-           //adjust arity/argc info
-           qSize f_argc = f->_argc;
-           app->_argc = f_argc + 1;
-           app->_arity = f->_arity - 1;
-           app->_args = (qThunk **) malloc(app->_argc * sizeof(qThunk *));
-           //move args in
-           for (qSize i = 0; i < f_argc; i++) {
-               app->_args[i] = f->_args[i];
-               q(Incref)(f->_args[i]);
-           }
-           app->_args[f_argc] = TOMUT(x);
-           q(Incref)(x);
+        app->_refct = 0;
+        app->_primal = false;
+        //copy func ptr
+        app->_func = f->_func;
+        //adjust arity/argc info
+        Size f_argc = f->_argc;
+        app->_argc = f_argc + 1;
+        app->_arity = f->_arity - 1;
+        app->_args = (Thunk **) malloc(app->_argc * sizeof(Thunk *));
+        //move args in
+        for (Size i = 0; i < f_argc; i++)
+        {
+            app->_args[i] = f->_args[i];
+            q(Incref)(f->_args[i]);
+        }
+        app->_args[f_argc] = mut_cast(x);
+        q(Incref)(x);
     )
     return app;
 }
 
-static qThunk *MultiApplyFromVAList(qThunk *f, qSize len, qThunk **x) {
+static Thunk *MultiApplyFromArray(Thunk *f, Size len, Thunk **x)
+{
 #ifdef NOFUNC_DEBUG
-    if (f->_primal) { fprintf(stderr, "Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
+    if (f->_primal) { eprintf("Cannot apply to primitive\n"); exit(EXIT_FAILURE); }
 #endif
     wparam(f,
     //memory management
-           DECLPTR(q(MThunk), app);
-           app->_refct = 0;
-           app->_primal = false;
-           //copy func ptr
-           app->_func = f->_func;
-           //adjust arity/argc info
-           qSize f_argc = f->_argc;
-           app->_argc = f_argc + len;
-           app->_arity = f->_arity - len;
-           app->_args = (qThunk **) malloc(app->_argc * sizeof(qThunk *));
-           //move args in
-           for (qSize i = 0; i < f_argc; i++) {
-               app->_args[i] = f->_args[i];
-               q(Incref)(f->_args[i]);
-           }
-           for (qSize i = 0; i < len; i++) {
-               app->_args[f_argc + i] = x[i];
-               q(Incref)(x[i]);
-           }
+        DECLPTR(q(MThunk), app);
+        app->_refct = 0;
+        app->_primal = false;
+        //copy func ptr
+        app->_func = f->_func;
+        //adjust arity/argc info
+        Size f_argc = f->_argc;
+        app->_argc = f_argc + len;
+        app->_arity = f->_arity - len;
+        app->_args = (Thunk **) malloc(app->_argc * sizeof(Thunk *));
+        //move args in
+        for (Size i = 0; i < f_argc; i++)
+        {
+            app->_args[i] = f->_args[i];
+            q(Incref)(f->_args[i]);
+        }
+        for (Size i = 0; i < len; i++)
+        {
+            app->_args[f_argc + i] = x[i];
+            q(Incref)(x[i]);
+        }
     )
     return app;
 }
 
-qThunk *q(MultiApply)(qThunk *f, qSize len, ...) {
+Thunk *q(MultiApply)(Thunk *f, Size len, ...)
+{
 #ifdef NOFUNC_DEBUG
-    if (f->_primal) fprintf(stderr, "First Arg of MultiApply must be a function");
+    if (f->_primal) {
+        eprintf("First Arg of MultiApply must be a function");
+        exit(EXIT_FAILURE);
+    }
 #endif
     WVARARGS(list, len,
-        qThunk **x = q(ListFromVAList)(len, list);
-        qThunk *rv = MultiApplyFromVAList(f, len, x);
+        Thunk **x = q(ListFromVAList)(len, list);
+        Thunk *rv = MultiApplyFromArray(f, len, x);
     )
     TFREE(x);
     return rv;
 }
 
-qThunk *q(WrapFunc)(q(Executor) func, qDiff arity) {
+Thunk *q(WrapFunc)(q(Executor) func, Diff arity)
+{
     DECLPTR(q(MThunk), caller);
     caller->_refct = 0;
 #ifdef ARITY_DEBUG
-    if (arity < 1) fprintf(stderr, "Arity of function cannot be 0\n");
+    if (arity < 1) {
+        eprintf"Arity of function cannot be 0\n");
+        exit(EXIT_FAILURE);
+    }
 #endif
     caller->_primal = false;
     caller->_arity = arity;
@@ -177,7 +234,8 @@ qThunk *q(WrapFunc)(q(Executor) func, qDiff arity) {
     return caller;
 }
 
-qThunk *q(WrapValue)(qValue *data) {
+Thunk *q(WrapValue)(Value *data)
+{
     DECLPTR(q(MThunk), primitive);
     primitive->_refct = 0;
     primitive->_primal = true;
@@ -185,22 +243,37 @@ qThunk *q(WrapValue)(qValue *data) {
     return primitive;
 }
 
-qValue *q(ExposeValue)(qThunk *t) {
+Value *q(ExposeValue)(Thunk *t)
+{
     q(Incref)(t);
 #ifdef NOVAL_DEBUG
-    if (!Eval(t)->_primal) { fprintf(stderr, "Cannot extract from composite"); exit(EXIT_FAILURE); }
+    if (!Eval(t)->_primal) { eprintf("Cannot extract from composite"); exit(EXIT_FAILURE); }
 #endif
-    qValue *v = &(TOMUT(q(Eval)(t))->_val);
+    Value *v = &(mut_cast(q(Eval)(t))->_val);
     q(Decref)(t);
     return v;
 }
 
-qValue *q(Construct)(qSize tag, qSize fieldc, qThunk **fields) {
-    DECLPTR(qValue, v);
+Value *q(Construct)(Size tag, Size fieldc, Thunk **fields)
+{
+    DECLPTR(Value, v);
     v->_tag = tag;
     v->_fieldc = fieldc;
     v->_fields = fields;
     return v;
+}
+
+inline Size q(Tag)(Value *v)
+{
+    return v->_tag;
+}
+
+inline Thunk *q(Field)(Value *v, Size i)
+{
+#ifdef ARITY_DEBUG
+    if (i >= v->_fieldc) { eprintf("Cannot access outside of the fields"); }
+#endif
+    return v->_fields[i];
 }
 
 #undef namespace
