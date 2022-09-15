@@ -175,7 +175,7 @@ inline decl_accessor(name) { \
 /*
  * Makes call to a constructor given namespace, name, and args
  */
-#define mk(base, con, ...) qu(base, MK_THUNK(con)) (qt(List_FromVA)(PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__))
+#define mk(base, con, ...) qu(base, MK_THUNK(con)) (qt(ListFromVA)(PP_NARG(__VA_ARGS__) __VA_OPT__(,) __VA_ARGS__))
 
 /*
  * Makes generic primitive thunk given tag, number of args, and args
@@ -186,6 +186,11 @@ inline decl_accessor(name) { \
  * Retrieves some generic field of a Thunk
  */
 #define get(thunk, idx) qt(Fields)(qt(ExposeValue)(thunk), idx)
+
+/*
+ * Shorthand for Apply
+ */
+#define ap qt(Apply)
 
 /*
  * Applies second argument to first, as if it were an infix operator

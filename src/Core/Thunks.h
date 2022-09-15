@@ -1,31 +1,17 @@
-#ifndef THUNKLIB__CORE__THUNK_H
-#define THUNKLIB__CORE__THUNK_H
+#ifndef THUNKLIB__CORE__THUNKS_H
+#define THUNKLIB__CORE__THUNKS_H
 
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include "Utils/idx.h"
 
-typedef int8_t Int8;
-typedef int16_t Int16;
-typedef int32_t Int32;
-typedef int64_t Int64;
-typedef uint8_t UInt8;
-typedef uint16_t UInt16;
-typedef uint32_t UInt32;
-typedef uint64_t UInt64;
-typedef float Float32;
-typedef double Float64;
-typedef bool Bool;
-typedef char Char;
+#define namespace qu(Core, Thunks)
+#define THUNKNS qu(Core, Thunks)
 
-#define namespace qu(Core, Thunk)
-#define THUNKNS qu(Core, Thunk)
-
-typedef UInt64 Size;
-typedef Int64 Diff;
+typedef UInt32 Size;
+typedef Int32 Diff;
 typedef const struct q(thunk_t) Thunk;
 typedef struct q(thunk_t) q(MThunk);
 
@@ -45,7 +31,6 @@ struct Value;
  * Primitive thunks contain a constant value of an Algebraic DataType
  */
 struct Thunk;
-
 
 /* REFERENCE INCREMENT
  * reference count set to 0 when Thunk is constructed
@@ -70,7 +55,6 @@ void q(Decref)(Thunk *);
  */
 Thunk *q(Apply)(Thunk *f, Thunk *x);
 
-#define ap qt(Apply)
 
 /* THUNK CREATOR
  * f: function
@@ -101,7 +85,7 @@ Thunk *q(WrapValue)(Value *);
  */
 Value *q(ExposeValue)(Thunk *);
 
-Thunk **q(List_FromVA)(Size len, ...);
+Thunk **q(ListFromVA)(Size len, ...);
 
 Thunk **q(ListFromVAList)(Size len, va_list list);
 
@@ -109,7 +93,10 @@ Value *q(Construct)(Size tag, Size fieldc, Thunk **fields);
 
 Size q(Tag)(Value *v);
 
+Size q(Fieldc)(Value *v);
+
 Thunk *q(Fields)(Value *v, Size i);
 
 #undef namespace
+
 #endif

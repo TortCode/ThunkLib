@@ -1,4 +1,4 @@
-#include "Thunk.h"
+#include "Thunks.h"
 #include <stdarg.h>
 #include <stdio.h>
 
@@ -26,10 +26,9 @@ struct q(thunk_t)
         };
         Value _val;
     };
-
 };
 
-Thunk **q(List_FromVA)(Size len, ...)
+Thunk **q(ListFromVA)(Size len, ...)
 {
     WVARARGS(list, len,
         Thunk **arr = (Thunk **) malloc(len * sizeof(Thunk *));
@@ -103,7 +102,7 @@ static Thunk *MoveResult(Thunk *dest, Thunk *src)
 #define ms mut_cast(src)
     md->_primal = ms->_primal;
     if (md->_primal)
-    {
+    {   // is primitive thunk
         md->_val = ms->_val;
     }
     else
@@ -149,6 +148,7 @@ Thunk *q(Apply)(Thunk *f, Thunk *x)
         DECLPTR(q(MThunk), app);
         app->_refct = 0;
         app->_primal = false;
+
         //copy func ptr
         app->_func = f->_func;
         //adjust arity/argc info
@@ -268,7 +268,12 @@ inline Size q(Tag)(Value *v)
     return v->_tag;
 }
 
-inline Thunk *q(Field)(Value *v, Size i)
+inline Size q(Fieldc)(Value *v)
+{
+    return v->_fieldc;
+}
+
+inline Thunk *q(Fields)(Value *v, Size i)
 {
 #ifdef ARITY_DEBUG
     if (i >= v->_fieldc) { eprintf("Cannot access outside of the fields"); }

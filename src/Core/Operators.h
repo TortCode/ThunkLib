@@ -1,13 +1,14 @@
-#ifndef THUNKLIB_OPERATOR_H
-#define THUNKLIB_OPERATOR_H
+#ifndef THUNKLIB__CORE__OPERATORS_H
+#define THUNKLIB__CORE__OPERATORS_H
 
 #include "idx.h"
-#include "Primitive.h"
+#include "Primitives.h"
 
-#define namespace qu(Core, Operator)
-#define OPERNS qu(Core, Operator)
+#define namespace qu(Core, Operators)
+#define OPERNS qu(Core, Operators)
 
 #define DECL_FORALLNUMS(name) \
+                              \
 decl_func(name ## S);      \
 decl_func(name ## I);      \
 decl_func(name ## L);      \

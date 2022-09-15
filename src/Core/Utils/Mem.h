@@ -29,4 +29,6 @@ wparam_nonull(thunk, body)          \
 
 #define mut_cast(froz) ((qt(MThunk)*) froz)
 
+#define cast_to(type, val) *((type *) &val)
+
 #endif

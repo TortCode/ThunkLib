@@ -1,5 +1,5 @@
-#include "Primitive.h"
-#include "Operator.h"
+#include "Primitives.h"
+#include "Operators.h"
 
 #define namespace OPERNS
 

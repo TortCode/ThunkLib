@@ -1,9 +1,9 @@
-#ifndef THUNKLIB__CORE__PRIMITIVE_H
-#define THUNKLIB__CORE__PRIMITIVE_H
-#include "Thunk.h"
+#ifndef THUNKLIB__CORE__PRIMITIVES_H
+#define THUNKLIB__CORE__PRIMITIVES_H
+#include "Thunks.h"
 
-#define namespace qu(Core, Primitive)
-#define PRIMNS qu(Core, Primitive)
+#define namespace qu(Core, Primitives)
+#define PRIMNS qu(Core, Primitives)
 
 #define wrap(type, val) TWRAP(type)(val)
 #define expose(type, val) TEXPOSE(type)(val)
@@ -14,9 +14,9 @@
 #define VEXPOSE(type) Value_Expose ## type
     //Definitions
 #define WRAPINTO_VAL(base, type) \
-static Value *VWRAP(type) (type t) { return VWRAP(base)(t); }
+static Value *VWRAP(type) (type t) { return VWRAP(base)((base) t); }
 #define EXPOSEFROM_VAL(base, type) \
-static type VEXPOSE(type) (Value *v) { return VEXPOSE(base)(v); }
+static type VEXPOSE(type) (Value *v) { return (base) VEXPOSE(base)(v); }
 #define BOX_VALUE(base, type) WRAPINTO_VAL(base, type) EXPOSEFROM_VAL(base, type)
 
 
